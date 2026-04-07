@@ -111,3 +111,68 @@ body {
 .hotspot.expand-left:hover .hotspot-text {
     opacity: 1;
 }
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    border: 1px solid #5C4033;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 60;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.modal-close:hover {
+    background: rgba(92, 64, 51, 0.15);
+    transform: scale(1.1);
+}
+
+.modal-content {
+    position: relative;
+    max-width: 60vw;
+    max-height: 75vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    transform: scale(0.95);
+    transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.modal-overlay.active .modal-content img {
+    transform: scale(1);
+}
