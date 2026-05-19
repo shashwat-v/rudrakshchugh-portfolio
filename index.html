@@ -1,120 +1,496 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RC</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body, html {
+            width: 100%; height: 100%;
+            margin: 0; overflow: hidden;
+            background: #000;
+            cursor: none;
+        }
+
+        /* Cursor */
+        #cursor {
+            position: fixed; top: 0; left: 0;
+            width: 20px; height: 20px;
+            border: 1px solid rgba(255,180,60,0.6);
+            background: transparent; border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+        }
+
+        /* Entry Sequence */
+        #entry-sequence {
+            position: fixed; inset: 0; background: #000;
+            z-index: 200; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .wordmark {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic; font-weight: 400;
+            font-size: clamp(48px, 7vw, 96px);
+            letter-spacing: 0.15em; color: #e8d5b0; opacity: 0;
+        }
+        .subtitle {
+            font-family: 'EB Garamond', serif;
+            font-style: italic; font-size: 18px;
+            color: #e8d5b0; opacity: 0; margin-top: 20px;
+        }
+
+
+
+        /* Overlays */
+        .global-overlays {
+            position: fixed; inset: 0; pointer-events: none; z-index: 5;
+        }
+        .overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
+        .overlay-noise { z-index: 2; opacity: 0.04; }
+        .overlay-vignette { z-index: 3; background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.75) 100%); }
+        .overlay-color { z-index: 4; background: rgba(180, 100, 20, 0.07); mix-blend-mode: multiply; }
+
+        /* Rooms */
+        #rooms-container {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+        }
+        .room {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            visibility: hidden; opacity: 0;
+        }
+        .scene-container {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw; height: 56.25vw;
+        }
+        @media (max-aspect-ratio: 16/9) {
+            .scene-container { width: 177.77vh; height: 100vh; }
+        }
+        .background-image {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; object-position: center; display: block;
+        }
+        .bg-study, .bg-bar, .bg-marcels {
+            background: linear-gradient(135deg, #1a0a02 0%, #3d1f08 50%, #1a0a02 100%);
+        }
+
+        /* Hotspots */
+        .hotspot {
+            position: absolute; width: 18px; height: 18px;
+            background: rgba(255, 180, 60, 0.15);
+            border: 1px solid rgba(255, 180, 60, 0.5); border-radius: 50%;
+            transform: translate(-50%, -50%); cursor: none; z-index: 10;
+        }
+        .hotspot::before, .hotspot::after {
+            content: ''; position: absolute;
+            top: 50%; left: 50%; width: 100%; height: 100%;
+            border-radius: 50%; border: 1px solid rgba(255, 180, 60, 0.8);
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0.8; pointer-events: none;
+            animation: pulseRing 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+        }
+        .hotspot::after { animation-delay: 0.4s; }
+        @keyframes pulseRing {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+        }
+
+        /* Panels */
+        #panel-overlay {
+            position: fixed; inset: 0; background: transparent; z-index: 90; display: none;
+        }
+        .panel {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: min(600px, 90vw); max-height: 80vh;
+            background: #1a1008; border: 1px solid rgba(255, 180, 60, 0.2);
+            border-radius: 4px; padding: 48px; overflow-y: auto; z-index: 100;
+            box-shadow: 0 0 80px rgba(0,0,0,0.8), 0 0 20px rgba(180,100,20,0.15); display: none;
+        }
+        .panel h1 {
+            font-family: 'Cormorant Garamond', serif; font-size: 36px;
+            color: #ffb43c; margin: 0 0 20px 0; font-weight: 400;
+        }
+        .panel p {
+            font-family: 'EB Garamond', serif; font-size: 18px; line-height: 1.6; margin: 0; color: #e8d5b0;
+        }
+        .close-btn {
+            position: absolute; top: 16px; right: 16px;
+            background: transparent; border: none; color: #e8d5b0; font-size: 28px; cursor: none; opacity: 0.6;
+        }
+        #panel-about-me {
+            background: #f5f0e8;
+            background-image: repeating-linear-gradient(transparent, transparent 31px, #e0d5c1 31px, #e0d5c1 32px);
+            border: none; padding-left: 80px; box-shadow: 0 0 80px rgba(0,0,0,0.5);
+        }
+        #panel-about-me .margin-line {
+            position: absolute; top: 0; bottom: 0; left: 50px;
+            width: 2px; background: rgba(220, 50, 50, 0.3);
+        }
+        #panel-about-me h1 { color: #2c1a0e; font-style: italic; font-size: 42px; }
+        #panel-about-me p { color: #2c1a0e; font-family: 'Caveat', cursive; font-size: 20px; line-height: 2; }
+        #panel-about-me .close-btn { color: #2c1a0e; }
+        #panel-marcels-detail, #panel-menu-specials {
+            border-color: rgba(139, 26, 26, 0.4);
+            box-shadow: 0 0 80px rgba(0,0,0,0.8), 0 0 20px rgba(139,26,26,0.15);
+        }
+        #panel-marcels-detail h1, #panel-menu-specials h1 { color: #8b1a1a; }
+        #panel-placeholder { text-align: center; }
+        #panel-placeholder h1 { color: #e8d5b0; }
+
+        /* Bottle Zoom */
+        #bottle-zoom-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: none; opacity: 0;
+        }
+        .bottle-container { position: absolute; display: flex; flex-direction: column; align-items: center; }
+        .bottle-placeholder {
+            width: auto; height: 500px; object-fit: contain;
+            border-radius: 10px; box-shadow: 0 0 80px rgba(200,120,20,0.5);
+        }
+        .tasting-notes {
+            margin-top: 32px; text-align: center; color: #e8d5b0;
+            font-family: 'EB Garamond', serif; font-style: italic; font-size: 18px; line-height: 1.6;
+        }
+        .tasting-notes p { margin: 4px 0; }
+    </style>
 </head>
-
 <body>
-    <div id="studyroom-view" class="view active">
-        <div class="scene-container">
-            <img class="background-image" src="studyroom.png" alt="Background">
 
-            <!-- Notepad -->
-            <a class="hotspot expand-right" style="left: 50.5%; top: 57%;" href="#about-me">
-                <span class="hotspot-icon">
-                    <svg width="13" height="11" viewBox="0 0 13 11" fill="none" xmlns="http://www.w3.org/2000/svg"
-                        stroke="white">
-                        <line x1="11.7" y1="4.7" x2="6.8" y2="9.6" stroke-width="2"></line>
-                        <path d="M10.2 4.7L6.8 1.3" stroke-width="2"></path>
-                        <line x1="10.5" y1="5.4" x2="0.9" y2="5.4" stroke-width="2"></line>
-                    </svg>
-                </span>
-                <span class="hotspot-text">About Me</span>
-            </a>
+    <div id="cursor"></div>
 
-            <!-- Marcel's Cup -->
-            <a class="hotspot expand-left" style="left: 61%; top: 63%;" href="#projects">
-                <span class="hotspot-icon">
-                    <svg width="13" height="11" viewBox="0 0 13 11" fill="none" xmlns="http://www.w3.org/2000/svg"
-                        stroke="white">
-                        <line x1="11.7" y1="4.7" x2="6.8" y2="9.6" stroke-width="2"></line>
-                        <path d="M10.2 4.7L6.8 1.3" stroke-width="2"></path>
-                        <line x1="10.5" y1="5.4" x2="0.9" y2="5.4" stroke-width="2"></line>
-                    </svg>
-                </span>
-                <span class="hotspot-text">Projects</span>
-            </a>
+    <div id="entry-sequence">
+        <div class="wordmark">RC</div>
+        <div class="subtitle">Best experienced in full screen — press F11</div>
+    </div>
 
-            <!-- Vinyl Player -->
-            <a class="hotspot expand-right" style="left: 14.5%; top: 60%;" href="#304bar" id="nav-to-bar">
-                <span class="hotspot-icon">
-                    <svg width="13" height="11" viewBox="0 0 13 11" fill="none" xmlns="http://www.w3.org/2000/svg"
-                        stroke="white">
-                        <line x1="11.7" y1="4.7" x2="6.8" y2="9.6" stroke-width="2"></line>
-                        <path d="M10.2 4.7L6.8 1.3" stroke-width="2"></path>
-                        <line x1="10.5" y1="5.4" x2="0.9" y2="5.4" stroke-width="2"></line>
-                    </svg>
-                </span>
-                <span class="hotspot-text">304 Bar</span>
-            </a>
 
-            <!-- Picture 1 -->
-            <a class="hotspot expand-left" style="left: 57%; top: 13%;" href="#picture-1">
-                <span class="hotspot-icon">
-                    <svg width="13" height="11" viewBox="0 0 13 11" fill="none" xmlns="http://www.w3.org/2000/svg"
-                        stroke="white">
-                        <line x1="11.7" y1="4.7" x2="6.8" y2="9.6" stroke-width="2"></line>
-                        <path d="M10.2 4.7L6.8 1.3" stroke-width="2"></path>
-                        <line x1="10.5" y1="5.4" x2="0.9" y2="5.4" stroke-width="2"></line>
-                    </svg>
-                </span>
-                <span class="hotspot-text">Hobbies / Passions</span>
-            </a>
 
-            <!-- Picture 2 -->
-            <a class="hotspot expand-left" style="left: 78.5%; top: 29%;" href="#picture-2">
-                <span class="hotspot-icon">
-                    <svg width="13" height="11" viewBox="0 0 13 11" fill="none" xmlns="http://www.w3.org/2000/svg"
-                        stroke="white">
-                        <line x1="11.7" y1="4.7" x2="6.8" y2="9.6" stroke-width="2"></line>
-                        <path d="M10.2 4.7L6.8 1.3" stroke-width="2"></path>
-                        <line x1="10.5" y1="5.4" x2="0.9" y2="5.4" stroke-width="2"></line>
-                    </svg>
-                </span>
-                <span class="hotspot-text">Experience</span>
-            </a>
+    <div class="global-overlays">
+        <div class="overlay overlay-color"></div>
+        <div class="overlay overlay-vignette"></div>
+        <svg class="overlay overlay-noise" xmlns="http://www.w3.org/2000/svg">
+            <filter id="noiseFilter">
+                <feTurbulence type="fractalNoise" baseFrequency="0.6" stitchTiles="stitch"/>
+            </filter>
+            <rect width="100%" height="100%" filter="url(#noiseFilter)"/>
+        </svg>
+    </div>
+
+    <div id="rooms-container">
+        <!-- Study Room -->
+        <div id="room-study" class="room">
+            <div class="scene-container">
+                <img class="background-image" src="studyroom.png" alt="Study Room">
+            </div>
+        </div>
+        <!-- 304 Bar -->
+        <div id="room-bar" class="room">
+            <div class="scene-container">
+                <img class="background-image" src="304bar.png" alt="304 Bar">
+            </div>
+        </div>
+        <!-- Marcel's -->
+        <div id="room-marcels" class="room">
+            <div class="scene-container">
+                <img class="background-image" src="marcels.png" alt="Marcel's Kiosk">
+            </div>
         </div>
     </div>
 
-    <div id="bar-view" class="view">
-        <div class="scene-container">
-            <img class="background-image" src="304bar.png" alt="304 Bar">
+    <div id="panel-overlay"></div>
+    
+    <div id="panel-about-me" class="panel">
+        <div class="margin-line"></div>
+        <button class="close-btn">×</button>
+        <h1>About Me</h1>
+        <p>I am a passionate creator focused on crafting unique digital experiences. This space reflects my journey, interests, and professional endeavors. I believe in blending art and logic to build something truly memorable.</p>
+    </div>
+
+    <div id="panel-304-bar" class="panel">
+        <button class="close-btn">×</button>
+        <h1>304 Bar</h1>
+        <p>An exclusive speakeasy experience, bringing together the finest cocktails and an intimate atmosphere. Every detail is curated for a perfect evening.</p>
+    </div>
+
+    <div id="panel-marcels-detail" class="panel">
+        <button class="close-btn">×</button>
+        <h1>Marcel's</h1>
+        <p>A cozy Parisian-style kiosk serving artisanal coffee and fresh pastries. The perfect spot to begin your morning or take a midday pause.</p>
+    </div>
+
+    <div id="panel-menu-specials" class="panel">
+        <button class="close-btn">×</button>
+        <h1>Menu & Specials</h1>
+        <p>Explore our seasonal offerings and signature drinks, crafted with precision and passion.</p>
+    </div>
+
+    <div id="panel-placeholder" class="panel">
+        <button class="close-btn">×</button>
+        <h1>Coming Soon</h1>
+        <p>This chapter is still being written.</p>
+    </div>
+
+    <div id="bottle-zoom-overlay">
+        <div class="bottle-container">
+            <img class="bottle-placeholder" src="bottle.png" alt="Bottle">
+            <div class="tasting-notes">
+                <p>Aged 12 years in oak barrels.</p>
+                <p>Notes of vanilla, dark cherry, and a hint of smoke.</p>
+                <p>Best enjoyed neat.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        const hotspotsConfig = {
+            study: [
+                { top: "58%", left: "50%", action: "panel", target: "panel-about-me" },
+                { top: "62%", left: "62%", action: "navigate", target: 2 },
+                { top: "62%", left: "14%", action: "navigate", target: 1 },
+                { top: "18%", left: "70%", action: "panel", target: "panel-placeholder" }
+            ],
+            bar: [
+                { top: "22%", left: "48%", action: "panel", target: "panel-304-bar" },
+                { top: "72%", left: "12%", action: "panel", target: "bottle-zoom" },
+                { top: "55%", left: "88%", action: "audio", target: "bar" },
+                { top: "28%", left: "75%", action: "link", target: "https://www.instagram.com/drinksat304/" }
+            ],
+            marcels: [
+                { top: "20%", left: "50%", action: "link", target: "https://marcels.in/" },
+                { top: "40%", left: "52%", action: "panel", target: "panel-marcels-detail" },
+                { top: "55%", left: "58%", action: "link", target: "https://www.instagram.com/marcels.in/" },
+                { top: "62%", left: "30%", action: "panel", target: "panel-menu-specials" },
+                { top: "50%", left: "10%", action: "navigate", target: 0 }
+            ]
+        };
+
+        const rooms = ["study", "bar", "marcels"];
+        let currentRoomIndex = 0;
+        let isSwitching = false;
+        
+        let audioCtx;
+        const audioNodes = {};
+        let isAudioEnabled = false;
+
+        // Custom Cursor Setup
+        const cursor = document.getElementById("cursor");
+        gsap.set(cursor, { xPercent: -50, yPercent: -50 });
+        const xTo = gsap.quickTo(cursor, "x", { duration: 0.15, ease: "power3" });
+        const yTo = gsap.quickTo(cursor, "y", { duration: 0.15, ease: "power3" });
+
+        window.addEventListener("mousemove", e => {
+            xTo(e.clientX);
+            yTo(e.clientY);
+        });
+
+        document.body.addEventListener("mouseover", e => {
+            const target = e.target.closest('.hotspot, .close-btn');
+            if (target) {
+                if (target.classList.contains('hotspot')) {
+                    gsap.to(cursor, { width: 40, height: 40, backgroundColor: "rgba(255,180,60,0.15)", border: "1px solid rgba(255,180,60,0.6)", borderRadius: "50%", duration: 0.2 });
+                } else {
+                    gsap.to(cursor, { width: 30, height: 30, backgroundColor: "rgba(255,180,60,0.1)", duration: 0.2 });
+                }
+            }
+        });
+
+        document.body.addEventListener("mouseout", e => {
+            if (e.target.closest('.hotspot, .close-btn')) {
+                gsap.to(cursor, { width: 20, height: 20, backgroundColor: "transparent", border: "1px solid rgba(255,180,60,0.6)", borderRadius: "50%", duration: 0.2 });
+            }
+        });
+
+        // Initialize Audio
+        function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const bufferSize = audioCtx.sampleRate * 2;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+
+            function createRoomAudio(type, freq, maxGain) {
+                const source = audioCtx.createBufferSource();
+                source.buffer = noiseBuffer;
+                source.loop = true;
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = type;
+                filter.frequency.value = freq;
+                const gainNode = audioCtx.createGain();
+                gainNode.gain.value = 0;
+                source.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                source.start();
+                return { source, filter, gainNode, maxGain, isPlaying: false };
+            }
+
+            audioNodes['study'] = createRoomAudio('lowpass', 4000, 0.03);
+            audioNodes['bar'] = createRoomAudio('lowpass', 800, 0.025);
+            audioNodes['marcels'] = createRoomAudio('bandpass', 1000, 0.02);
+        }
+
+        function toggleAudio(roomName) {
+            if (!audioCtx) initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             
-            <!-- Back to Study Room -->
-            <a class="hotspot expand-left" style="left: 93%; top: 55%;" href="#studyroom" id="nav-to-studyroom">
-                <span class="hotspot-icon">
-                    <svg width="13" height="11" viewBox="0 0 13 11" fill="none" xmlns="http://www.w3.org/2000/svg"
-                        stroke="white">
-                        <line x1="11.7" y1="4.7" x2="6.8" y2="9.6" stroke-width="2"></line>
-                        <path d="M10.2 4.7L6.8 1.3" stroke-width="2"></path>
-                        <line x1="10.5" y1="5.4" x2="0.9" y2="5.4" stroke-width="2"></line>
-                    </svg>
-                </span>
-                <span class="hotspot-text">Back to Study Room</span>
-            </a>
-        </div>
-    </div>
+            const node = audioNodes[roomName];
+            if (isAudioEnabled) {
+                isAudioEnabled = false;
+                node.isPlaying = false;
+                node.gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+                node.gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.8);
+            } else {
+                isAudioEnabled = true;
+                node.isPlaying = true;
+                node.gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+                node.gainNode.gain.linearRampToValueAtTime(node.maxGain, audioCtx.currentTime + 1.2);
+            }
+        }
 
-    <!-- Empty script since we removed temporary coordinate listener -->
-    <!-- Modal for About Me -->
-    <div id="about-me-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close" aria-label="Close">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"
-                    stroke="#5C4033" stroke-width="2">
-                    <line x1="1" y1="1" x2="13" y2="13"></line>
-                    <line x1="13" y1="1" x2="1" y2="13"></line>
-                </svg>
-            </button>
-            <img src="about%20me.png" alt="About Me">
-        </div>
-    </div>
+        // Initialize Hotspots
+        Object.keys(hotspotsConfig).forEach(roomId => {
+            const container = document.querySelector(`#room-${roomId} .scene-container`);
+            hotspotsConfig[roomId].forEach(spot => {
+                const h = document.createElement("div");
+                h.className = "hotspot";
+                h.style.top = spot.top;
+                h.style.left = spot.left;
+                
+                h.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    if (spot.action === "panel") {
+                        if (spot.target === "bottle-zoom") openBottleZoom(h);
+                        else openPanel(spot.target, h);
+                    } else if (spot.action === "audio") {
+                        toggleAudio(spot.target);
+                    } else if (spot.action === "navigate") {
+                        switchRoom(spot.target);
+                    } else if (spot.action === "link") {
+                        window.open(spot.target, "_blank");
+                    }
+                });
+                container.appendChild(h);
+            });
+        });
 
-    <script src="script.js"></script>
+        // Panel Logic
+        let currentPanelTl = null;
+        const panelOverlay = document.getElementById("panel-overlay");
+
+        function openPanel(panelId, hotspot) {
+            if (currentPanelTl) return;
+            const panel = document.getElementById(panelId);
+            if (!panel) return;
+            
+            const rect = hotspot.getBoundingClientRect();
+            const hx = rect.left + rect.width / 2;
+            const hy = rect.top + rect.height / 2;
+            
+            currentPanelTl = gsap.timeline({
+                onReverseComplete: () => {
+                    gsap.set([panel, panelOverlay], { display: "none" });
+                    currentPanelTl = null;
+                }
+            });
+            
+            currentPanelTl.set([panelOverlay, panel], { display: "block" });
+            currentPanelTl.to(panelOverlay, { opacity: 1, duration: 0.3 });
+            currentPanelTl.fromTo(panel, {
+                left: hx, top: hy, xPercent: -50, yPercent: -50, scale: 0.1, opacity: 0
+            }, {
+                left: "50%", top: "50%", scale: 1, opacity: 1, duration: 0.6, ease: "power3.out"
+            }, 0);
+        }
+
+        function closePanel() {
+            if (currentPanelTl) currentPanelTl.reverse();
+        }
+
+        panelOverlay.addEventListener("click", closePanel);
+        document.querySelectorAll(".close-btn").forEach(btn => btn.addEventListener("click", closePanel));
+
+        // Bottle Zoom Logic
+        let bottleTl = null;
+        function openBottleZoom(hotspot) {
+            if (bottleTl) return;
+            const overlay = document.getElementById("bottle-zoom-overlay");
+            const container = overlay.querySelector(".bottle-container");
+            const notes = overlay.querySelector(".tasting-notes");
+            
+            const rect = hotspot.getBoundingClientRect();
+            const hx = rect.left + rect.width / 2;
+            const hy = rect.top + rect.height / 2;
+            
+            bottleTl = gsap.timeline();
+            bottleTl.set(overlay, { display: "block" });
+            bottleTl.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.4 });
+            bottleTl.fromTo(container, {
+                left: hx, top: hy, xPercent: -50, yPercent: -50, scale: 0.15
+            }, {
+                left: "50%", top: "45%", scale: 1, duration: 0.6, ease: "power3.out"
+            }, "-=0.4");
+            bottleTl.fromTo(notes, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 }, "-=0.2");
+        }
+
+        document.getElementById("bottle-zoom-overlay").addEventListener("click", () => {
+            if (bottleTl) {
+                bottleTl.reverse().then(() => { gsap.set("#bottle-zoom-overlay", { display: "none" }); });
+                bottleTl = null;
+            }
+        });
+
+        function switchRoom(newIndex) {
+            if (newIndex === currentRoomIndex || isSwitching) return;
+            isSwitching = true;
+            
+            const oldRoom = document.getElementById(`room-${rooms[currentRoomIndex]}`);
+            const newRoom = document.getElementById(`room-${rooms[newIndex]}`);
+            
+            const tl = gsap.timeline({ onComplete: () => isSwitching = false });
+            
+            tl.to(oldRoom, { opacity: 0, duration: 0.5, onComplete: () => gsap.set(oldRoom, { visibility: "hidden" }) });
+            
+            if (isAudioEnabled && audioCtx) {
+                const oldNode = audioNodes[rooms[currentRoomIndex]];
+                const newNode = audioNodes[rooms[newIndex]];
+                if (oldNode && oldNode.isPlaying) {
+                    oldNode.isPlaying = false;
+                    oldNode.gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+                    oldNode.gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.8);
+                }
+                newNode.isPlaying = true;
+                newNode.gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+                newNode.gainNode.gain.setValueAtTime(0, audioCtx.currentTime + 0.7);
+                newNode.gainNode.gain.linearRampToValueAtTime(newNode.maxGain, audioCtx.currentTime + 1.9);
+            }
+            
+            currentRoomIndex = newIndex;
+            tl.set(newRoom, { visibility: "visible", scale: 1.08, opacity: 0 }, "+=0.2");
+            tl.to(newRoom, { scale: 1, opacity: 1, duration: 1.2, ease: "power2.out" });
+        }
+
+        // Entry Sequence
+        window.addEventListener("load", () => {
+            const tl = gsap.timeline();
+            tl.to(".wordmark", { opacity: 1, duration: 1 });
+            tl.to(".subtitle", { opacity: 0.55, duration: 1 }, "+=0.5");
+            tl.to([".wordmark", ".subtitle"], { opacity: 0, duration: 1 }, "+=1.5");
+            
+            tl.set("#room-study", { visibility: "visible", scale: 1.08, opacity: 0 });
+            tl.set("#entry-sequence", { display: "none" });
+            
+            tl.to("#room-study", { scale: 1, opacity: 1, duration: 1.8, ease: "power2.out" });
+        });
+
+        document.body.addEventListener('click', () => {
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        }, {once: true});
+    </script>
 </body>
-
 </html>
