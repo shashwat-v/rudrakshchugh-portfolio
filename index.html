@@ -80,23 +80,74 @@
 
         /* Hotspots */
         .hotspot {
-            position: absolute; width: 18px; height: 18px;
-            background: rgba(255, 180, 60, 0.15);
-            border: 1px solid rgba(255, 180, 60, 0.5); border-radius: 50%;
-            transform: translate(-50%, -50%); cursor: none; z-index: 10;
+            position: absolute;
+            max-width: 26px; /* Initially closed circle */
+            height: 26px;
+            border-radius: 13px;
+            border: 1px solid white;
+            color: white;
+            overflow: hidden;
+            transition: max-width 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), background 0.8s ease;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            text-shadow: 0 0 10px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.15);
+            cursor: none;
+            font-family: sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            z-index: 10;
+            white-space: nowrap;
         }
-        .hotspot::before, .hotspot::after {
-            content: ''; position: absolute;
-            top: 50%; left: 50%; width: 100%; height: 100%;
-            border-radius: 50%; border: 1px solid rgba(255, 180, 60, 0.8);
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 0.8; pointer-events: none;
-            animation: pulseRing 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+
+        .hotspot:hover {
+            max-width: 250px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(2px);
         }
-        .hotspot::after { animation-delay: 0.4s; }
-        @keyframes pulseRing {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
-            100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+
+        .hotspot-icon {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Expand Right */
+        .hotspot.expand-right {
+            transform: translate(-13px, -13px);
+            flex-direction: row;
+        }
+        .hotspot.expand-right .hotspot-icon svg {
+            transform: scaleX(-1);
+        }
+        .hotspot.expand-right .hotspot-text {
+            padding-left: 5px;
+            padding-right: 15px;
+            opacity: 0;
+            transition: opacity 0.5s ease 0.3s;
+        }
+        .hotspot.expand-right:hover .hotspot-text {
+            opacity: 1;
+        }
+
+        /* Expand Left */
+        .hotspot.expand-left {
+            transform: translate(calc(-100% + 13px), -13px);
+            flex-direction: row-reverse;
+        }
+        .hotspot.expand-left .hotspot-text {
+            padding-right: 5px;
+            padding-left: 15px;
+            opacity: 0;
+            transition: opacity 0.5s ease 0.3s;
+        }
+        .hotspot.expand-left:hover .hotspot-text {
+            opacity: 1;
         }
 
         /* Panels */
@@ -105,17 +156,25 @@
         }
         .panel {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: min(600px, 90vw); max-height: 80vh;
+            width: min(600px, 90vw); max-height: 48vh;
             background: #1a1008; border: 1px solid rgba(255, 180, 60, 0.2);
             border-radius: 4px; padding: 48px; overflow-y: auto; z-index: 100;
             box-shadow: 0 0 80px rgba(0,0,0,0.8), 0 0 20px rgba(180,100,20,0.15); display: none;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .panel::-webkit-scrollbar {
+            display: none;
         }
         .panel h1 {
             font-family: 'Cormorant Garamond', serif; font-size: 36px;
             color: #ffb43c; margin: 0 0 20px 0; font-weight: 400;
         }
         .panel p {
-            font-family: 'EB Garamond', serif; font-size: 18px; line-height: 1.6; margin: 0; color: #e8d5b0;
+            font-family: 'EB Garamond', serif; font-size: 18px; line-height: 1.6; margin: 0 0 16px 0; color: #e8d5b0;
+        }
+        .panel p:last-child {
+            margin-bottom: 0;
         }
         .close-btn {
             position: absolute; top: 16px; right: 16px;
@@ -130,8 +189,9 @@
             position: absolute; top: 0; bottom: 0; left: 50px;
             width: 2px; background: rgba(220, 50, 50, 0.3);
         }
-        #panel-about-me h1 { color: #2c1a0e; font-style: italic; font-size: 42px; }
-        #panel-about-me p { color: #2c1a0e; font-family: 'Caveat', cursive; font-size: 20px; line-height: 2; }
+        #panel-about-me h1 { color: #2c1a0e; font-style: italic; font-size: 42px; margin: 0 0 32px 0; line-height: 32px; }
+        #panel-about-me p { color: #2c1a0e; font-family: 'Caveat', cursive; font-size: 20px; line-height: 32px; margin: 0 0 32px 0; }
+        #panel-about-me p:last-child { margin-bottom: 0; }
         #panel-about-me .close-btn { color: #2c1a0e; }
         #panel-marcels-detail, #panel-menu-specials {
             border-color: rgba(139, 26, 26, 0.4);
@@ -145,16 +205,38 @@
         #bottle-zoom-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: none; opacity: 0;
         }
-        .bottle-container { position: absolute; display: flex; flex-direction: column; align-items: center; }
+        .bottle-container { 
+            position: absolute; 
+            width: min(90vh, 90vw);
+            height: min(90vh, 90vw);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
         .bottle-placeholder {
-            width: auto; height: 500px; object-fit: contain;
-            border-radius: 10px; box-shadow: 0 0 80px rgba(200,120,20,0.5);
+            width: 100%; height: 100%; object-fit: contain;
         }
-        .tasting-notes {
-            margin-top: 32px; text-align: center; color: #e8d5b0;
-            font-family: 'EB Garamond', serif; font-style: italic; font-size: 18px; line-height: 1.6;
+        .bottle-label-text {
+            position: absolute;
+            top: 24%;
+            left: 30%;
+            width: 40%;
+            height: 48%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: #2c1a0e;
+            font-family: 'EB Garamond', serif;
+            font-size: clamp(12px, 2.2vmin, 22px);
+            line-height: 1.25;
+            text-align: center;
+            overflow-y: auto;
+            padding: 2%;
+            box-sizing: border-box;
+            background: transparent;
         }
-        .tasting-notes p { margin: 4px 0; }
+        .bottle-label-text::-webkit-scrollbar { width: 4px; }
+        .bottle-label-text::-webkit-scrollbar-track { background: transparent; }
+        .bottle-label-text::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        .bottle-label-text p { margin: 1.5% 0; }
     </style>
 </head>
 <body>
@@ -206,7 +288,9 @@
         <div class="margin-line"></div>
         <button class="close-btn">×</button>
         <h1>About Me</h1>
-        <p>I am a passionate creator focused on crafting unique digital experiences. This space reflects my journey, interests, and professional endeavors. I believe in blending art and logic to build something truly memorable.</p>
+        <p>A New Delhi based businessman and investor focused on building enduring, designmled businesses across hospitality and consumer brands. My approach is defined by an uncompromising emphasis on quality, consistency, and the strength of foundational systems ensuring that every venture is built with clarity, discipline, and long term resilience. I believe that truly enduring brands are created at the intersection of craft, clarity, and commercial discipline, where thoughtful brand identity is seamlessly supported by operational excellence and scalability. My work combines creative instinct with strategic rigor, allowing me to build ventures that are not only distinctive in their positioning but also robust in their execution.</p>
+        <p>This philosophy is deeply influenced by my upbringing in a family that has been embedded in the hospitality industry for over five decades, as owners of Nizam’s Kathi Kabab. Growing up within a legacy brand instilled in me an early understanding of what it takes to build and sustain trust across generations where quality is non negotiable and consistency defines credibility. Carrying this legacy forward, I ensure that every product and experience I create reflects these core values, while my own perspective drives the modernisation of offerings and brand narratives to remain relevant in an evolving market.</p>
+        <p>I have founded and led multiple ventures in the food and beverage space, with hands on involvement across concept development, brand positioning, financial planning, and execution. Alongside entrepreneurship, I actively invest time and capital into ideas and individuals that demonstrate originality, resilience, and the potential to create lasting value. Ultimately, my objective is to build a body of work that extends the strength of the legacy I come from creating businesses that are enduring, defensible, and set apart by their depth, discipline, and uncompromising standards.</p>
     </div>
 
     <div id="panel-304-bar" class="panel">
@@ -218,7 +302,10 @@
     <div id="panel-marcels-detail" class="panel">
         <button class="close-btn">×</button>
         <h1>Marcel's</h1>
-        <p>A cozy Parisian-style kiosk serving artisanal coffee and fresh pastries. The perfect spot to begin your morning or take a midday pause.</p>
+        <p>Marcel’s began as a small window in the heart of Defence Colony, a 60 sq. ft. pocket of warmth I created under the umbrella of 310 Hospitality. What may look like a simple grab and go coffee shop is, in reality, a deeply personal dream of mine brought to life.</p>
+        <p>I was inspired by the quiet elegance of European kiosks I came across in Italy, France, and Spain. I remember sitting and observing how something so small could feel so intentional. That stayed with me. I went back and hand sketched every inch of Marcel’s myself. The menu wasn’t outsourced or built by consultants either, it came from my own research, trial and error, and a strong belief that real hospitality has to come from within.</p>
+        <p>At a time when convenience was beginning to replace connection, and delivery apps were quietly taking over the culture of stepping out, I wanted Marcel’s to bring that feeling back. The idea was simple, give people a reason to pause, to step out, even if just for a coffee.</p>
+        <p>Over the last ten months, this tiny window has grown into something far more meaningful than I imagined. It has become a small part of the neighbourhood’s daily rhythm, a place for quick conversations, familiar faces, and a brief escape from routine. In some way, I feel Marcel’s has helped people rediscover the charm of going out for coffee again, and that, to me, is everything.</p>
     </div>
 
     <div id="panel-menu-specials" class="panel">
@@ -235,11 +322,13 @@
 
     <div id="bottle-zoom-overlay">
         <div class="bottle-container">
-            <img class="bottle-placeholder" src="bottle.png" alt="Bottle">
-            <div class="tasting-notes">
-                <p>Aged 12 years in oak barrels.</p>
-                <p>Notes of vanilla, dark cherry, and a hint of smoke.</p>
-                <p>Best enjoyed neat.</p>
+            <img class="bottle-placeholder" src="bottlecut.png" alt="Bottle">
+            <div class="bottle-label-text">
+                <p>304 Bar - 304 is a concept where I act as an investor and partner which is built around three college pals and the shared energy of that phase of life, carefree, spontaneous, and full of moments that stay with you. While not rooted in a specific personal story, it draws from a feeling most people recognise.</p>
+                <p>304 brings this idea to life as an immersive hospitality experience. The space is designed as a listening room, where vinyl led music sets the tone and becomes an essential part of the atmosphere rather than just background sound.</p>
+                <p>The bar features a focused cocktail program, with 110 in house ingredients crafted into 16 cocktails. Each drink is inspired by familiar memories, flavours, and experiences associated with college years, reinterpreted in a more refined and thoughtful way.</p>
+                <p>The food follows a similar philosophy, offering small plates that take Indian flavours and present them with a playful, slightly unconventional approach.</p>
+                <p>304 is, at its core, a space that invites people to step away from routine and reconnect with a simpler, more relaxed state of mind, one that feels both nostalgic and new at the same time.</p>
             </div>
         </div>
     </div>
@@ -248,23 +337,21 @@
     <script>
         const hotspotsConfig = {
             study: [
-                { top: "58%", left: "50%", action: "panel", target: "panel-about-me" },
-                { top: "62%", left: "62%", action: "navigate", target: 2 },
-                { top: "62%", left: "14%", action: "navigate", target: 1 },
-                { top: "18%", left: "70%", action: "panel", target: "panel-placeholder" }
+                { top: "58%", left: "50%", action: "panel", target: "panel-about-me", text: "About Me", type: "expand-right" },
+                { top: "62%", left: "62%", action: "navigate", target: 2, text: "Marcel's", type: "expand-left" },
+                { top: "60%", left: "14%", action: "navigate", target: 1, text: "304 Bar", type: "expand-right" },
+                { top: "28%", left: "93.5%", action: "panel", target: "panel-placeholder", text: "Coming Soon", type: "expand-left" }
             ],
             bar: [
-                { top: "22%", left: "48%", action: "panel", target: "panel-304-bar" },
-                { top: "72%", left: "12%", action: "panel", target: "bottle-zoom" },
-                { top: "55%", left: "88%", action: "audio", target: "bar" },
-                { top: "28%", left: "75%", action: "link", target: "https://www.instagram.com/drinksat304/" }
+                { top: "78%", left: "14%", action: "panel", target: "bottle-zoom", text: "About 304", type: "expand-right" },
+                { top: "72%", left: "90%", action: "navigate", target: 0, text: "Back to Study", type: "expand-left" },
+                { top: "20%", left: "15%", action: "link", target: "https://www.instagram.com/drinksat304/", text: "Instagram", type: "expand-left" }
             ],
             marcels: [
-                { top: "20%", left: "50%", action: "link", target: "https://marcels.in/" },
-                { top: "40%", left: "52%", action: "panel", target: "panel-marcels-detail" },
-                { top: "55%", left: "58%", action: "link", target: "https://www.instagram.com/marcels.in/" },
-                { top: "62%", left: "30%", action: "panel", target: "panel-menu-specials" },
-                { top: "50%", left: "10%", action: "navigate", target: 0 }
+                { top: "30%", left: "50%", action: "link", target: "https://marcels.in/", text: "Website", type: "expand-left" },
+                { top: "80%", left: "40%", action: "panel", target: "panel-marcels-detail", text: "About Marcel's", type: "expand-left" },
+                { top: "62%", left: "55%", action: "link", target: "https://www.instagram.com/marcels.in/", text: "Instagram", type: "expand-left" },
+                { top: "50%", left: "10%", action: "navigate", target: 0, text: "Back to Study", type: "expand-right" }
             ]
         };
 
@@ -358,9 +445,19 @@
             const container = document.querySelector(`#room-${roomId} .scene-container`);
             hotspotsConfig[roomId].forEach(spot => {
                 const h = document.createElement("div");
-                h.className = "hotspot";
+                h.className = `hotspot ${spot.type || 'expand-right'}`;
                 h.style.top = spot.top;
                 h.style.left = spot.left;
+                h.innerHTML = `
+                    <span class="hotspot-icon">
+                        <svg width="13" height="11" viewBox="0 0 13 11" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="white">
+                            <line x1="11.7" y1="4.7" x2="6.8" y2="9.6" stroke-width="2"></line>
+                            <path d="M10.2 4.7L6.8 1.3" stroke-width="2"></path>
+                            <line x1="10.5" y1="5.4" x2="0.9" y2="5.4" stroke-width="2"></line>
+                        </svg>
+                    </span>
+                    <span class="hotspot-text">${spot.text || ''}</span>
+                `;
                 
                 h.addEventListener("click", (e) => {
                     e.stopPropagation();
@@ -401,10 +498,21 @@
             
             currentPanelTl.set([panelOverlay, panel], { display: "block" });
             currentPanelTl.to(panelOverlay, { opacity: 1, duration: 0.3 });
+
+            let targetLeft = "50%";
+            let targetTop = "50%";
+            if (panelId === "panel-marcels-detail" && window.innerWidth > 600) {
+                const margin = 24;
+                const panelWidth = panel.offsetWidth;
+                const panelHeight = panel.offsetHeight;
+                targetLeft = (window.innerWidth - panelWidth / 2 - margin) + "px";
+                targetTop = (window.innerHeight - panelHeight / 2 - margin) + "px";
+            }
+
             currentPanelTl.fromTo(panel, {
                 left: hx, top: hy, xPercent: -50, yPercent: -50, scale: 0.1, opacity: 0
             }, {
-                left: "50%", top: "50%", scale: 1, opacity: 1, duration: 0.6, ease: "power3.out"
+                left: targetLeft, top: targetTop, scale: 1, opacity: 1, duration: 0.6, ease: "power3.out"
             }, 0);
         }
 
@@ -414,6 +522,22 @@
 
         panelOverlay.addEventListener("click", closePanel);
         document.querySelectorAll(".close-btn").forEach(btn => btn.addEventListener("click", closePanel));
+
+        window.addEventListener("resize", () => {
+            const panel = document.querySelector(".panel[style*='display: block']");
+            if (panel && panel.id === "panel-marcels-detail") {
+                if (window.innerWidth > 600) {
+                    const margin = 24;
+                    const panelWidth = panel.offsetWidth;
+                    const panelHeight = panel.offsetHeight;
+                    const targetLeft = (window.innerWidth - panelWidth / 2 - margin) + "px";
+                    const targetTop = (window.innerHeight - panelHeight / 2 - margin) + "px";
+                    gsap.set(panel, { left: targetLeft, top: targetTop });
+                } else {
+                    gsap.set(panel, { left: "50%", top: "50%" });
+                }
+            }
+        });
 
         // Bottle Zoom Logic
         let bottleTl = null;
@@ -433,9 +557,11 @@
             bottleTl.fromTo(container, {
                 left: hx, top: hy, xPercent: -50, yPercent: -50, scale: 0.15
             }, {
-                left: "50%", top: "45%", scale: 1, duration: 0.6, ease: "power3.out"
+                left: "50%", top: "50%", scale: 1, duration: 0.6, ease: "power3.out"
             }, "-=0.4");
-            bottleTl.fromTo(notes, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 }, "-=0.2");
+            if (notes) {
+                bottleTl.fromTo(notes, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 }, "-=0.2");
+            }
         }
 
         document.getElementById("bottle-zoom-overlay").addEventListener("click", () => {
