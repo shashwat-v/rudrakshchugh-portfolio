@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Portfolio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -165,7 +165,7 @@
         html.mobile-mode body,
         html.mobile-mode {
             cursor: auto;
-            touch-action: pan-x;
+            touch-action: auto;
         }
 
         html.mobile-mode #cursor {
@@ -173,8 +173,7 @@
         }
 
         html.mobile-mode #rooms-container {
-            overflow-x: auto;
-            overflow-y: hidden;
+            overflow: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             -ms-overflow-style: none;
@@ -227,10 +226,19 @@
 
         /* Panels: mobile-friendly sizing */
         html.mobile-mode .panel {
-            width: min(500px, 92vw);
-            max-height: 60vh;
+            width: 92vw;
+            max-width: 500px;
+            max-height: 80vh;
             padding: 28px 24px;
             cursor: auto;
+        }
+
+        /* iPad / tablet panel height cap — needs higher specificity to override mobile-mode */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            html.mobile-mode .panel,
+            .panel {
+                max-height: 42vh;
+            }
         }
 
         html.mobile-mode .panel h1 {
@@ -377,8 +385,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: min(600px, 90vw);
-            max-height: 48vh;
+            width: 90vw;
+            max-width: 600px;
+            max-height: 80vh;
             background: #1a1008;
             border: 1px solid rgba(255, 180, 60, 0.2);
             border-radius: 4px;
@@ -687,12 +696,11 @@
         let isAudioEnabled = false;
 
         // Touch / Mobile Detection
-        // Detects real touch devices OR small landscape viewports (for DevTools testing & tablets)
+        // Detects real touch devices OR narrow viewports (like phones in portrait)
         function checkMobileMode() {
             const hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
-            const isSmallLandscape = window.innerHeight <= 500 && window.innerWidth > window.innerHeight;
             const isNarrowViewport = window.innerWidth <= 932;
-            return hasCoarsePointer || isSmallLandscape || (isNarrowViewport && window.innerHeight <= 500);
+            return hasCoarsePointer || isNarrowViewport;
         }
 
         let isTouch = checkMobileMode();
@@ -773,26 +781,33 @@
             roomsContainer.style.height = '100%';
         }
 
-        function getSceneWidth() {
+        function getSceneSize() {
             const vh = window.innerHeight;
             const vw = window.innerWidth;
             let w = vh * AR;
-            if (w <= vw) w = vw * 1.5;
-            return w;
+            let h = vh;
+            if (w <= vw) {
+                w = vw * 1.5;
+                h = w / AR;
+            }
+            return { width: w, height: h };
         }
 
         function centerScroll() {
             if (!isTouch) return;
-            const sceneWidth = getSceneWidth();
-            const scrollTarget = (sceneWidth - window.innerWidth) / 2;
-            roomsContainer.scrollLeft = Math.max(0, scrollTarget);
+            const size = getSceneSize();
+            const scrollTargetX = (size.width - window.innerWidth) / 2;
+            const scrollTargetY = (size.height - window.innerHeight) / 2;
+            roomsContainer.scrollLeft = Math.max(0, scrollTargetX);
+            roomsContainer.scrollTop = Math.max(0, scrollTargetY);
         }
 
         function centerScrollSmooth() {
             if (!isTouch) return;
-            const sceneWidth = getSceneWidth();
-            const scrollTarget = (sceneWidth - window.innerWidth) / 2;
-            roomsContainer.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
+            const size = getSceneSize();
+            const scrollTargetX = (size.width - window.innerWidth) / 2;
+            const scrollTargetY = (size.height - window.innerHeight) / 2;
+            roomsContainer.scrollTo({ left: Math.max(0, scrollTargetX), top: Math.max(0, scrollTargetY), behavior: 'smooth' });
         }
 
         if (isTouch) {
@@ -952,40 +967,83 @@
             const hx = rect.left + rect.width / 2;
             const hy = rect.top + rect.height / 2;
 
+            // Clear any leftover GSAP inline styles so CSS defaults apply cleanly
+            gsap.set(panel, { clearProps: "all" });
+
+            // Show panel invisibly to measure dimensions
+            panel.style.display = "block";
+            panel.style.visibility = "hidden";
+            panelOverlay.style.display = "block";
+            panelOverlay.style.opacity = "0";
+
+            // Force reflow to get accurate measurements
+            const panelWidth = panel.offsetWidth;
+            const panelHeight = panel.offsetHeight;
+
+            // Hide again before animation starts
+            panel.style.visibility = "";
+
             currentPanelTl = gsap.timeline({
                 onReverseComplete: () => {
-                    gsap.set([panel, panelOverlay], { display: "none" });
+                    panel.style.display = "none";
+                    panelOverlay.style.display = "none";
+                    gsap.set(panel, { clearProps: "all" });
                     currentPanelTl = null;
                 }
             });
 
-            currentPanelTl.set([panelOverlay, panel], { display: "block" });
-            currentPanelTl.to(panelOverlay, { opacity: 1, duration: 0.3 });
+            currentPanelTl.to(panelOverlay, { opacity: 1, duration: 0.3 }, 0);
 
-            let targetLeft = "50%";
-            let targetTop = "50%";
+            const isMobilePhone = window.innerWidth <= 767;
+            const isTablet = window.innerWidth > 767 && window.innerWidth <= 1024;
 
-            // On mobile, always center panels
-            if (!isTouch) {
-                if (window.innerWidth > 600) {
-                    const margin = 24;
-                    const panelWidth = panel.offsetWidth;
-                    const panelHeight = panel.offsetHeight;
-                    if (panelId === "panel-marcels-detail") {
-                        targetLeft = (window.innerWidth - panelWidth / 2 - margin) + "px";
-                        targetTop = (window.innerHeight - panelHeight / 2 - margin) + "px";
-                    } else if (panelId === "panel-304-bar") {
-                        targetLeft = "63%";
-                        targetTop = (window.innerHeight - panelHeight / 2 - margin) + "px";
-                    }
+            if (isMobilePhone || isTablet) {
+                // MOBILE & TABLET: Do NOT touch left/top/transform — let CSS center it.
+                // Only animate opacity and scale.
+                currentPanelTl.fromTo(panel, {
+                    scale: 0.8,
+                    opacity: 0
+                }, {
+                    scale: 1,
+                    opacity: 1,
+                    duration: 0.4,
+                    ease: "power2.out"
+                }, 0);
+            } else {
+                // DESKTOP: spatial positioning
+                let targetLeft = window.innerWidth / 2;
+                let targetTop = window.innerHeight / 2;
+                const margin = 24;
+
+                if (panelId === "panel-marcels-detail") {
+                    targetLeft = window.innerWidth - panelWidth / 2 - margin;
+                    targetTop = window.innerHeight - panelHeight / 2 - margin;
+                } else if (panelId === "panel-304-bar") {
+                    targetLeft = window.innerWidth * 0.65;
+                    targetTop = window.innerHeight - panelHeight / 2 - margin;
+                } else if (panelId === "panel-about-me") {
+                    targetLeft = panelWidth / 2 + margin;
+                    targetTop = panelHeight / 2 + margin;
                 }
-            }
 
-            currentPanelTl.fromTo(panel, {
-                left: hx, top: hy, xPercent: -50, yPercent: -50, scale: 0.1, opacity: 0
-            }, {
-                left: targetLeft, top: targetTop, scale: 1, opacity: 1, duration: 0.6, ease: "power3.out"
-            }, 0);
+                currentPanelTl.fromTo(panel, {
+                    left: hx + "px",
+                    top: hy + "px",
+                    xPercent: -50,
+                    yPercent: -50,
+                    scale: 0.1,
+                    opacity: 0
+                }, {
+                    left: targetLeft + "px",
+                    top: targetTop + "px",
+                    xPercent: -50,
+                    yPercent: -50,
+                    scale: 1,
+                    opacity: 1,
+                    duration: 0.6,
+                    ease: "power3.out"
+                }, 0);
+            }
         }
 
         function closePanel() {
@@ -995,27 +1053,40 @@
         panelOverlay.addEventListener("click", closePanel);
         document.querySelectorAll(".close-btn").forEach(btn => btn.addEventListener("click", closePanel));
 
-        if (!isTouch) {
-            window.addEventListener("resize", () => {
-                const panel = document.querySelector(".panel[style*='display: block']");
-                if (panel && window.innerWidth > 600) {
-                    const margin = 24;
+        window.addEventListener("resize", () => {
+            const panel = document.querySelector(".panel[style*='display: block']");
+            if (!panel) return;
+            const isMobilePhone = window.innerWidth <= 767;
+            
+            if (isMobilePhone || window.innerWidth <= 1024) {
+                // On mobile & tablet, clear GSAP positioning so CSS centering takes over
+                gsap.set(panel, { clearProps: "left,top,xPercent,yPercent" });
+            } else {
+                const panelWidth = panel.offsetWidth;
+                const panelHeight = panel.offsetHeight;
+                const isTablet = window.innerWidth <= 1024;
+                const margin = isTablet ? 30 : 24;
+                let targetLeft = window.innerWidth / 2;
+                let targetTop = window.innerHeight / 2;
+
+                if (isTablet) {
+                    targetLeft = Math.max(panelWidth / 2 + margin, Math.min(window.innerWidth - panelWidth / 2 - margin, window.innerWidth / 2));
+                    targetTop = Math.max(panelHeight / 2 + margin, Math.min(window.innerHeight - panelHeight / 2 - margin, window.innerHeight / 2));
+                } else {
                     if (panel.id === "panel-marcels-detail") {
-                        const panelWidth = panel.offsetWidth;
-                        const panelHeight = panel.offsetHeight;
-                        const targetLeft = (window.innerWidth - panelWidth / 2 - margin) + "px";
-                        const targetTop = (window.innerHeight - panelHeight / 2 - margin) + "px";
-                        gsap.set(panel, { left: targetLeft, top: targetTop });
+                        targetLeft = window.innerWidth - panelWidth / 2 - margin;
+                        targetTop = window.innerHeight - panelHeight / 2 - margin;
                     } else if (panel.id === "panel-304-bar") {
-                        const panelHeight = panel.offsetHeight;
-                        const targetTop = (window.innerHeight - panelHeight / 2 - margin) + "px";
-                        gsap.set(panel, { left: "65%", top: targetTop });
+                        targetLeft = window.innerWidth * 0.65;
+                        targetTop = window.innerHeight - panelHeight / 2 - margin;
+                    } else if (panel.id === "panel-about-me") {
+                        targetLeft = panelWidth / 2 + margin;
+                        targetTop = panelHeight / 2 + margin;
                     }
-                } else if (panel && (panel.id === "panel-marcels-detail" || panel.id === "panel-304-bar")) {
-                    gsap.set(panel, { left: "50%", top: "50%" });
                 }
-            });
-        }
+                gsap.set(panel, { left: targetLeft + "px", top: targetTop + "px", xPercent: -50, yPercent: -50 });
+            }
+        });
 
         // Bottle Zoom logic removed
 
