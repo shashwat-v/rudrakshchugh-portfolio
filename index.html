@@ -1,98 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&display=swap"
+        rel="stylesheet">
     <style>
-        * { box-sizing: border-box; }
-        body, html {
-            width: 100%; height: 100%;
-            margin: 0; overflow: hidden;
+        * {
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
             background: #000;
             cursor: none;
+            touch-action: none;
         }
 
         /* Cursor */
         #cursor {
-            position: fixed; top: 0; left: 0;
-            width: 20px; height: 20px;
-            border: 1px solid rgba(255,180,60,0.6);
-            background: transparent; border-radius: 50%;
-            pointer-events: none; z-index: 9999;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(255, 180, 60, 0.6);
+            background: transparent;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
         }
 
         /* Entry Sequence */
         #entry-sequence {
-            position: fixed; inset: 0; background: #000;
-            z-index: 200; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: none;
         }
+
         .wordmark {
             font-family: 'Cormorant Garamond', serif;
-            font-style: italic; font-weight: 400;
+            font-style: italic;
+            font-weight: 400;
             font-size: clamp(48px, 7vw, 96px);
-            letter-spacing: 0.15em; color: #e8d5b0; opacity: 0;
+            letter-spacing: 0.15em;
+            color: #e8d5b0;
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
+        .wordmark .expand-text {
+            display: inline-block;
+            width: 0;
+            opacity: 0;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .wordmark .space {
+            display: inline-block;
+            width: 0;
+            opacity: 0;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
         .subtitle {
             font-family: 'EB Garamond', serif;
-            font-style: italic; font-size: 18px;
-            color: #e8d5b0; opacity: 0; margin-top: 20px;
+            font-style: italic;
+            font-size: 18px;
+            color: #e8d5b0;
+            opacity: 0;
+            margin-top: 24px;
+            letter-spacing: 0.05em;
+            text-align: center;
         }
 
 
 
         /* Overlays */
         .global-overlays {
-            position: fixed; inset: 0; pointer-events: none; z-index: 5;
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
         }
-        .overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
-        .overlay-noise { z-index: 2; opacity: 0.04; }
-        .overlay-vignette { z-index: 3; background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.75) 100%); }
-        .overlay-color { z-index: 4; background: rgba(180, 100, 20, 0.07); mix-blend-mode: multiply; }
+
+        .overlay {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .overlay-noise {
+            z-index: 2;
+            opacity: 0.04;
+        }
+
+        .overlay-vignette {
+            z-index: 3;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.75) 100%);
+        }
+
+        .overlay-color {
+            z-index: 4;
+            background: rgba(180, 100, 20, 0.07);
+            mix-blend-mode: multiply;
+        }
 
         /* Rooms */
         #rooms-container {
-            position: absolute; inset: 0; width: 100%; height: 100%;
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
+
         .room {
-            position: absolute; inset: 0; width: 100%; height: 100%;
-            visibility: hidden; opacity: 0;
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            visibility: hidden;
+            opacity: 0;
+            overflow: hidden;
         }
+
         .scene-container {
-            position: absolute; top: 50%; left: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            width: 100vw; height: 56.25vw;
+            width: 100vw;
+            height: 56.25vw;
         }
+
         @media (max-aspect-ratio: 16/9) {
-            .scene-container { width: 177.77vh; height: 100vh; }
+            .scene-container {
+                width: 177.77vh;
+                height: 100vh;
+            }
         }
+
+        /* Mobile / Touch Device Overrides — activated via .mobile-mode class on <html> */
+        html.mobile-mode body,
+        html.mobile-mode {
+            cursor: auto;
+            touch-action: pan-x;
+        }
+
+        html.mobile-mode #cursor {
+            display: none !important;
+        }
+
+        html.mobile-mode #rooms-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        html.mobile-mode #rooms-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        html.mobile-mode .room {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: auto;
+            height: 100%;
+            overflow: visible;
+        }
+
+        html.mobile-mode .scene-container {
+            position: relative;
+            top: auto;
+            left: auto;
+            transform: none;
+            height: 100vh;
+            /* width set dynamically by JS */
+        }
+
+        /* Hotspots: always show text, bigger tap targets */
+        html.mobile-mode .hotspot {
+            max-width: 250px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+            cursor: pointer;
+            min-height: 36px;
+            height: auto;
+            border-radius: 18px;
+        }
+
+        html.mobile-mode .hotspot .hotspot-text {
+            opacity: 1 !important;
+        }
+
+        html.mobile-mode .hotspot.expand-right .hotspot-text {
+            opacity: 1;
+        }
+
+        html.mobile-mode .hotspot.expand-left .hotspot-text {
+            opacity: 1;
+        }
+
+        /* Panels: mobile-friendly sizing */
+        html.mobile-mode .panel {
+            width: min(500px, 92vw);
+            max-height: 60vh;
+            padding: 28px 24px;
+            cursor: auto;
+        }
+
+        html.mobile-mode .panel h1 {
+            font-size: 28px;
+            margin: 0 0 14px 0;
+        }
+
+        html.mobile-mode .panel p {
+            font-size: 15px;
+            line-height: 1.5;
+            margin: 0 0 12px 0;
+        }
+
+        html.mobile-mode .close-btn {
+            cursor: pointer;
+            font-size: 32px;
+            padding: 8px;
+            opacity: 0.8;
+        }
+
+        html.mobile-mode #panel-about-me {
+            padding-left: 50px;
+        }
+
+        html.mobile-mode #panel-about-me .margin-line {
+            left: 30px;
+        }
+
+        html.mobile-mode #panel-about-me h1 {
+            font-size: 32px;
+        }
+
+        html.mobile-mode #panel-about-me p {
+            font-size: 17px;
+            line-height: 28px;
+            margin: 0 0 28px 0;
+        }
+
         .background-image {
-            position: absolute; inset: 0; width: 100%; height: 100%;
-            object-fit: cover; object-position: center; display: block;
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
         }
-        .bg-study, .bg-bar, .bg-marcels {
+
+        .bg-study,
+        .bg-bar,
+        .bg-marcels {
             background: linear-gradient(135deg, #1a0a02 0%, #3d1f08 50%, #1a0a02 100%);
         }
 
         /* Hotspots */
         .hotspot {
             position: absolute;
-            max-width: 26px; /* Initially closed circle */
+            max-width: 26px;
+            /* Initially closed circle */
             height: 26px;
             border-radius: 13px;
             border: 1px solid white;
             color: white;
             overflow: hidden;
             transition: max-width 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), background 0.8s ease;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            text-shadow: 0 0 10px rgba(0,0,0,0.4);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
             display: flex;
             align-items: center;
-            background: rgba(0,0,0,0.15);
+            background: rgba(0, 0, 0, 0.15);
             cursor: none;
             font-family: sans-serif;
             font-size: 14px;
@@ -104,7 +312,7 @@
 
         .hotspot:hover {
             max-width: 250px;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(2px);
         }
 
@@ -122,15 +330,18 @@
             transform: translate(-13px, -13px);
             flex-direction: row;
         }
+
         .hotspot.expand-right .hotspot-icon svg {
             transform: scaleX(-1);
         }
+
         .hotspot.expand-right .hotspot-text {
             padding-left: 5px;
             padding-right: 15px;
             opacity: 0;
             transition: opacity 0.5s ease 0.3s;
         }
+
         .hotspot.expand-right:hover .hotspot-text {
             opacity: 1;
         }
@@ -140,112 +351,189 @@
             transform: translate(calc(-100% + 13px), -13px);
             flex-direction: row-reverse;
         }
+
         .hotspot.expand-left .hotspot-text {
             padding-right: 5px;
             padding-left: 15px;
             opacity: 0;
             transition: opacity 0.5s ease 0.3s;
         }
+
         .hotspot.expand-left:hover .hotspot-text {
             opacity: 1;
         }
 
         /* Panels */
         #panel-overlay {
-            position: fixed; inset: 0; background: transparent; z-index: 90; display: none;
+            position: fixed;
+            inset: 0;
+            background: transparent;
+            z-index: 90;
+            display: none;
         }
+
         .panel {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: min(600px, 90vw); max-height: 48vh;
-            background: #1a1008; border: 1px solid rgba(255, 180, 60, 0.2);
-            border-radius: 4px; padding: 48px; overflow-y: auto; z-index: 100;
-            box-shadow: 0 0 80px rgba(0,0,0,0.8), 0 0 20px rgba(180,100,20,0.15); display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: min(600px, 90vw);
+            max-height: 48vh;
+            background: #1a1008;
+            border: 1px solid rgba(255, 180, 60, 0.2);
+            border-radius: 4px;
+            padding: 48px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 0 80px rgba(0, 0, 0, 0.8), 0 0 20px rgba(180, 100, 20, 0.15);
+            display: none;
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
         .panel::-webkit-scrollbar {
             display: none;
         }
+
         .panel h1 {
-            font-family: 'Cormorant Garamond', serif; font-size: 36px;
-            color: #ffb43c; margin: 0 0 20px 0; font-weight: 400;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 36px;
+            color: #ffb43c;
+            margin: 0 0 20px 0;
+            font-weight: 400;
         }
+
         .panel p {
-            font-family: 'EB Garamond', serif; font-size: 18px; line-height: 1.6; margin: 0 0 16px 0; color: #e8d5b0;
+            font-family: 'EB Garamond', serif;
+            font-size: 18px;
+            line-height: 1.6;
+            margin: 0 0 16px 0;
+            color: #e8d5b0;
         }
+
         .panel p:last-child {
             margin-bottom: 0;
         }
+
         .close-btn {
-            position: absolute; top: 16px; right: 16px;
-            background: transparent; border: none; color: #e8d5b0; font-size: 28px; cursor: none; opacity: 0.6;
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: transparent;
+            border: none;
+            color: #e8d5b0;
+            font-size: 28px;
+            cursor: none;
+            opacity: 0.6;
         }
+
         #panel-about-me {
             background: #f5f0e8;
             background-image: repeating-linear-gradient(transparent, transparent 31px, #e0d5c1 31px, #e0d5c1 32px);
-            border: none; padding-left: 80px; box-shadow: 0 0 80px rgba(0,0,0,0.5);
+            border: none;
+            padding-left: 80px;
+            box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
         }
-        #panel-about-me .margin-line {
-            position: absolute; top: 0; bottom: 0; left: 50px;
-            width: 2px; background: rgba(220, 50, 50, 0.3);
-        }
-        #panel-about-me h1 { color: #2c1a0e; font-style: italic; font-size: 42px; margin: 0 0 32px 0; line-height: 32px; }
-        #panel-about-me p { color: #2c1a0e; font-family: 'Caveat', cursive; font-size: 20px; line-height: 32px; margin: 0 0 32px 0; }
-        #panel-about-me p:last-child { margin-bottom: 0; }
-        #panel-about-me .close-btn { color: #2c1a0e; }
-        #panel-marcels-detail, #panel-menu-specials {
-            border-color: rgba(139, 26, 26, 0.4);
-            box-shadow: 0 0 80px rgba(0,0,0,0.8), 0 0 20px rgba(139,26,26,0.15);
-        }
-        #panel-marcels-detail h1, #panel-menu-specials h1 { color: #8b1a1a; }
-        #panel-placeholder { text-align: center; }
-        #panel-placeholder h1 { color: #e8d5b0; }
 
-        /* Bottle Zoom */
-        #bottle-zoom-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: none; opacity: 0;
-        }
-        .bottle-container { 
-            position: absolute; 
-            width: min(90vh, 90vw);
-            height: min(90vh, 90vw);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .bottle-placeholder {
-            width: 100%; height: 100%; object-fit: contain;
-        }
-        .bottle-label-text {
+        #panel-about-me .margin-line {
             position: absolute;
-            top: 24%;
-            left: 30%;
-            width: 40%;
-            height: 48%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            color: #2c1a0e;
-            font-family: 'EB Garamond', serif;
-            font-size: clamp(12px, 2.2vmin, 22px);
-            line-height: 1.25;
-            text-align: center;
-            overflow-y: auto;
-            padding: 2%;
-            box-sizing: border-box;
-            background: transparent;
+            top: 0;
+            bottom: 0;
+            left: 50px;
+            width: 2px;
+            background: rgba(220, 50, 50, 0.3);
         }
-        .bottle-label-text::-webkit-scrollbar { width: 4px; }
-        .bottle-label-text::-webkit-scrollbar-track { background: transparent; }
-        .bottle-label-text::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
-        .bottle-label-text p { margin: 1.5% 0; }
+
+        #panel-about-me h1 {
+            color: #2c1a0e;
+            font-style: italic;
+            font-size: 42px;
+            margin: 0 0 32px 0;
+            line-height: 32px;
+        }
+
+        #panel-about-me p {
+            color: #2c1a0e;
+            font-family: 'Caveat', cursive;
+            font-size: 20px;
+            line-height: 32px;
+            margin: 0 0 32px 0;
+        }
+
+        #panel-about-me p:last-child {
+            margin-bottom: 0;
+        }
+
+        #panel-about-me .close-btn {
+            color: #2c1a0e;
+        }
+
+        #panel-marcels-detail,
+        #panel-menu-specials {
+            border-color: rgba(139, 26, 26, 0.4);
+            box-shadow: 0 0 80px rgba(0, 0, 0, 0.8), 0 0 20px rgba(139, 26, 26, 0.15);
+        }
+
+        #panel-marcels-detail h1,
+        #panel-menu-specials h1 {
+            color: #8b1a1a;
+        }
+
+        #panel-placeholder {
+            text-align: center;
+        }
+
+        #panel-placeholder h1 {
+            color: #e8d5b0;
+        }
+
+        /* Mobile landscape hint arrow */
+        .scroll-hint {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            align-items: center;
+            gap: 8px;
+            color: rgba(232, 213, 176, 0.6);
+            font-family: 'EB Garamond', serif;
+            font-size: 14px;
+            font-style: italic;
+            z-index: 6;
+            pointer-events: none;
+            animation: scrollHintFade 3s ease-in-out infinite;
+        }
+
+        @keyframes scrollHintFade {
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        html.mobile-mode .scroll-hint {
+            display: flex;
+        }
     </style>
 </head>
+
 <body>
 
     <div id="cursor"></div>
 
     <div id="entry-sequence">
-        <div class="wordmark">RC</div>
-        <div class="subtitle">Best experienced in full screen — press F11</div>
+        <div class="wordmark">
+            <span class="letter">R</span><span class="expand-text">udraksh</span>
+            <span class="space">&nbsp;</span>
+            <span class="letter">C</span><span class="expand-text">hugh</span>
+        </div>
+        <div class="subtitle">Best experienced in full screen</div>
     </div>
 
 
@@ -255,9 +543,9 @@
         <div class="overlay overlay-vignette"></div>
         <svg class="overlay overlay-noise" xmlns="http://www.w3.org/2000/svg">
             <filter id="noiseFilter">
-                <feTurbulence type="fractalNoise" baseFrequency="0.6" stitchTiles="stitch"/>
+                <feTurbulence type="fractalNoise" baseFrequency="0.6" stitchTiles="stitch" />
             </filter>
-            <rect width="100%" height="100%" filter="url(#noiseFilter)"/>
+            <rect width="100%" height="100%" filter="url(#noiseFilter)" />
         </svg>
     </div>
 
@@ -282,30 +570,73 @@
         </div>
     </div>
 
+    <div class="scroll-hint" id="scroll-hint">
+        <span>← swipe to explore →</span>
+    </div>
+
     <div id="panel-overlay"></div>
-    
+
     <div id="panel-about-me" class="panel">
         <div class="margin-line"></div>
         <button class="close-btn">×</button>
         <h1>About Me</h1>
-        <p>A New Delhi based businessman and investor focused on building enduring, designmled businesses across hospitality and consumer brands. My approach is defined by an uncompromising emphasis on quality, consistency, and the strength of foundational systems ensuring that every venture is built with clarity, discipline, and long term resilience. I believe that truly enduring brands are created at the intersection of craft, clarity, and commercial discipline, where thoughtful brand identity is seamlessly supported by operational excellence and scalability. My work combines creative instinct with strategic rigor, allowing me to build ventures that are not only distinctive in their positioning but also robust in their execution.</p>
-        <p>This philosophy is deeply influenced by my upbringing in a family that has been embedded in the hospitality industry for over five decades, as owners of Nizam’s Kathi Kabab. Growing up within a legacy brand instilled in me an early understanding of what it takes to build and sustain trust across generations where quality is non negotiable and consistency defines credibility. Carrying this legacy forward, I ensure that every product and experience I create reflects these core values, while my own perspective drives the modernisation of offerings and brand narratives to remain relevant in an evolving market.</p>
-        <p>I have founded and led multiple ventures in the food and beverage space, with hands on involvement across concept development, brand positioning, financial planning, and execution. Alongside entrepreneurship, I actively invest time and capital into ideas and individuals that demonstrate originality, resilience, and the potential to create lasting value. Ultimately, my objective is to build a body of work that extends the strength of the legacy I come from creating businesses that are enduring, defensible, and set apart by their depth, discipline, and uncompromising standards.</p>
+        <p>A New Delhi based businessman and investor focused on building enduring, designmled businesses across
+            hospitality and consumer brands. My approach is defined by an uncompromising emphasis on quality,
+            consistency, and the strength of foundational systems ensuring that every venture is built with clarity,
+            discipline, and long term resilience. I believe that truly enduring brands are created at the intersection
+            of craft, clarity, and commercial discipline, where thoughtful brand identity is seamlessly supported by
+            operational excellence and scalability. My work combines creative instinct with strategic rigor, allowing me
+            to build ventures that are not only distinctive in their positioning but also robust in their execution.</p>
+        <p>This philosophy is deeply influenced by my upbringing in a family that has been embedded in the hospitality
+            industry for over five decades, as owners of Nizam’s Kathi Kabab. Growing up within a legacy brand instilled
+            in me an early understanding of what it takes to build and sustain trust across generations where quality is
+            non negotiable and consistency defines credibility. Carrying this legacy forward, I ensure that every
+            product and experience I create reflects these core values, while my own perspective drives the
+            modernisation of offerings and brand narratives to remain relevant in an evolving market.</p>
+        <p>I have founded and led multiple ventures in the food and beverage space, with hands on involvement across
+            concept development, brand positioning, financial planning, and execution. Alongside entrepreneurship, I
+            actively invest time and capital into ideas and individuals that demonstrate originality, resilience, and
+            the potential to create lasting value. Ultimately, my objective is to build a body of work that extends the
+            strength of the legacy I come from creating businesses that are enduring, defensible, and set apart by their
+            depth, discipline, and uncompromising standards.</p>
     </div>
 
     <div id="panel-304-bar" class="panel">
         <button class="close-btn">×</button>
         <h1>304 Bar</h1>
-        <p>An exclusive speakeasy experience, bringing together the finest cocktails and an intimate atmosphere. Every detail is curated for a perfect evening.</p>
+        <p>304 is a concept where I act as an investor and partner which is built around three college pals and the
+            shared energy of that phase of life, carefree, spontaneous, and full of moments that stay with you. While
+            not rooted in a specific personal story, it draws from a feeling most people recognise.</p>
+        <p>304 brings this idea to life as an immersive hospitality experience. The space is designed as a listening
+            room, where vinyl led music sets the tone and becomes an essential part of the atmosphere rather than just
+            background sound.</p>
+        <p>The bar features a focused cocktail program, with 110 in house ingredients crafted into 16 cocktails. Each
+            drink is inspired by familiar memories, flavours, and experiences associated with college years,
+            reinterpreted in a more refined and thoughtful way.</p>
+        <p>The food follows a similar philosophy, offering small plates that take Indian flavours and present them with
+            a playful, slightly unconventional approach.</p>
+        <p>304 is, at its core, a space that invites people to step away from routine and reconnect with a simpler, more
+            relaxed state of mind, one that feels both nostalgic and new at the same time.</p>
     </div>
 
     <div id="panel-marcels-detail" class="panel">
         <button class="close-btn">×</button>
         <h1>Marcel's</h1>
-        <p>Marcel’s began as a small window in the heart of Defence Colony, a 60 sq. ft. pocket of warmth I created under the umbrella of 310 Hospitality. What may look like a simple grab and go coffee shop is, in reality, a deeply personal dream of mine brought to life.</p>
-        <p>I was inspired by the quiet elegance of European kiosks I came across in Italy, France, and Spain. I remember sitting and observing how something so small could feel so intentional. That stayed with me. I went back and hand sketched every inch of Marcel’s myself. The menu wasn’t outsourced or built by consultants either, it came from my own research, trial and error, and a strong belief that real hospitality has to come from within.</p>
-        <p>At a time when convenience was beginning to replace connection, and delivery apps were quietly taking over the culture of stepping out, I wanted Marcel’s to bring that feeling back. The idea was simple, give people a reason to pause, to step out, even if just for a coffee.</p>
-        <p>Over the last ten months, this tiny window has grown into something far more meaningful than I imagined. It has become a small part of the neighbourhood’s daily rhythm, a place for quick conversations, familiar faces, and a brief escape from routine. In some way, I feel Marcel’s has helped people rediscover the charm of going out for coffee again, and that, to me, is everything.</p>
+        <p>Marcel’s began as a small window in the heart of Defence Colony, a 60 sq. ft. pocket of warmth I created
+            under the umbrella of 310 Hospitality. What may look like a simple grab and go coffee shop is, in reality, a
+            deeply personal dream of mine brought to life.</p>
+        <p>I was inspired by the quiet elegance of European kiosks I came across in Italy, France, and Spain. I remember
+            sitting and observing how something so small could feel so intentional. That stayed with me. I went back and
+            hand sketched every inch of Marcel’s myself. The menu wasn’t outsourced or built by consultants either, it
+            came from my own research, trial and error, and a strong belief that real hospitality has to come from
+            within.</p>
+        <p>At a time when convenience was beginning to replace connection, and delivery apps were quietly taking over
+            the culture of stepping out, I wanted Marcel’s to bring that feeling back. The idea was simple, give people
+            a reason to pause, to step out, even if just for a coffee.</p>
+        <p>Over the last ten months, this tiny window has grown into something far more meaningful than I imagined. It
+            has become a small part of the neighbourhood’s daily rhythm, a place for quick conversations, familiar
+            faces, and a brief escape from routine. In some way, I feel Marcel’s has helped people rediscover the charm
+            of going out for coffee again, and that, to me, is everything.</p>
     </div>
 
     <div id="panel-menu-specials" class="panel">
@@ -320,18 +651,7 @@
         <p>This chapter is still being written.</p>
     </div>
 
-    <div id="bottle-zoom-overlay">
-        <div class="bottle-container">
-            <img class="bottle-placeholder" src="bottlecut.png" alt="Bottle">
-            <div class="bottle-label-text">
-                <p>304 Bar - 304 is a concept where I act as an investor and partner which is built around three college pals and the shared energy of that phase of life, carefree, spontaneous, and full of moments that stay with you. While not rooted in a specific personal story, it draws from a feeling most people recognise.</p>
-                <p>304 brings this idea to life as an immersive hospitality experience. The space is designed as a listening room, where vinyl led music sets the tone and becomes an essential part of the atmosphere rather than just background sound.</p>
-                <p>The bar features a focused cocktail program, with 110 in house ingredients crafted into 16 cocktails. Each drink is inspired by familiar memories, flavours, and experiences associated with college years, reinterpreted in a more refined and thoughtful way.</p>
-                <p>The food follows a similar philosophy, offering small plates that take Indian flavours and present them with a playful, slightly unconventional approach.</p>
-                <p>304 is, at its core, a space that invites people to step away from routine and reconnect with a simpler, more relaxed state of mind, one that feels both nostalgic and new at the same time.</p>
-            </div>
-        </div>
-    </div>
+    <!-- removed bottle zoom overlay -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script>
@@ -340,17 +660,20 @@
                 { top: "58%", left: "50%", action: "panel", target: "panel-about-me", text: "About Me", type: "expand-right" },
                 { top: "62%", left: "62%", action: "navigate", target: 2, text: "Marcel's", type: "expand-left" },
                 { top: "60%", left: "14%", action: "navigate", target: 1, text: "304 Bar", type: "expand-right" },
-                { top: "28%", left: "93.5%", action: "panel", target: "panel-placeholder", text: "Coming Soon", type: "expand-left" }
+                { top: "28%", left: "93.5%", action: "panel", target: "panel-placeholder", text: "Coming Soon", type: "expand-left" },
+                { top: "46%", left: "25%", action: "none", text: "lowell", type: "expand-right" },
+                { top: "78%", left: "85%", action: "none", text: "by Rudy", type: "expand-left" },
+                { top: "15%", left: "82%", action: "link", target: "https://www.instagram.com/theturkeyproject/?hl=en", text: "The Turkey Project", type: "expand-left" }
             ],
             bar: [
-                { top: "78%", left: "14%", action: "panel", target: "bottle-zoom", text: "About 304", type: "expand-right" },
-                { top: "72%", left: "90%", action: "navigate", target: 0, text: "Back to Study", type: "expand-left" },
-                { top: "20%", left: "15%", action: "link", target: "https://www.instagram.com/drinksat304/", text: "Instagram", type: "expand-left" }
+                { top: "78%", left: "14%", action: "panel", target: "panel-304-bar", text: "About 304", type: "expand-right" },
+                { top: "52%", left: "66%", action: "navigate", target: 0, text: "Back to Study", type: "expand-left" },
+                { top: "40%", left: "53%", action: "link", target: "https://www.instagram.com/drinksat304/", text: "Instagram", type: "expand-left" }
             ],
             marcels: [
-                { top: "30%", left: "50%", action: "link", target: "https://marcels.in/", text: "Website", type: "expand-left" },
+                { top: "27%", left: "53%", action: "link", target: "https://marcels.in/", text: "Website", type: "expand-left" },
                 { top: "80%", left: "40%", action: "panel", target: "panel-marcels-detail", text: "About Marcel's", type: "expand-left" },
-                { top: "62%", left: "55%", action: "link", target: "https://www.instagram.com/marcels.in/", text: "Instagram", type: "expand-left" },
+                { top: "84%", left: "84%", action: "link", target: "https://www.instagram.com/marcels.in/", text: "Instagram", type: "expand-left" },
                 { top: "50%", left: "10%", action: "navigate", target: 0, text: "Back to Study", type: "expand-right" }
             ]
         };
@@ -358,38 +681,152 @@
         const rooms = ["study", "bar", "marcels"];
         let currentRoomIndex = 0;
         let isSwitching = false;
-        
+
         let audioCtx;
         const audioNodes = {};
         let isAudioEnabled = false;
 
-        // Custom Cursor Setup
+        // Touch / Mobile Detection
+        // Detects real touch devices OR small landscape viewports (for DevTools testing & tablets)
+        function checkMobileMode() {
+            const hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+            const isSmallLandscape = window.innerHeight <= 500 && window.innerWidth > window.innerHeight;
+            const isNarrowViewport = window.innerWidth <= 932;
+            return hasCoarsePointer || isSmallLandscape || (isNarrowViewport && window.innerHeight <= 500);
+        }
+
+        let isTouch = checkMobileMode();
+        const roomsContainer = document.getElementById('rooms-container');
+
+        // Apply mobile-mode class
+        function applyMobileMode() {
+            if (isTouch) {
+                document.documentElement.classList.add('mobile-mode');
+            } else {
+                document.documentElement.classList.remove('mobile-mode');
+            }
+        }
+        applyMobileMode();
+
+        // Custom Cursor Setup (desktop only)
         const cursor = document.getElementById("cursor");
-        gsap.set(cursor, { xPercent: -50, yPercent: -50 });
-        const xTo = gsap.quickTo(cursor, "x", { duration: 0.15, ease: "power3" });
-        const yTo = gsap.quickTo(cursor, "y", { duration: 0.15, ease: "power3" });
+        if (!isTouch) {
+            gsap.set(cursor, { xPercent: -50, yPercent: -50 });
+            const xTo = gsap.quickTo(cursor, "x", { duration: 0.15, ease: "power3" });
+            const yTo = gsap.quickTo(cursor, "y", { duration: 0.15, ease: "power3" });
 
-        window.addEventListener("mousemove", e => {
-            xTo(e.clientX);
-            yTo(e.clientY);
-        });
+            window.addEventListener("mousemove", e => {
+                xTo(e.clientX);
+                yTo(e.clientY);
+            });
 
-        document.body.addEventListener("mouseover", e => {
-            const target = e.target.closest('.hotspot, .close-btn');
-            if (target) {
-                if (target.classList.contains('hotspot')) {
-                    gsap.to(cursor, { width: 40, height: 40, backgroundColor: "rgba(255,180,60,0.15)", border: "1px solid rgba(255,180,60,0.6)", borderRadius: "50%", duration: 0.2 });
-                } else {
-                    gsap.to(cursor, { width: 30, height: 30, backgroundColor: "rgba(255,180,60,0.1)", duration: 0.2 });
+            document.body.addEventListener("mouseover", e => {
+                const target = e.target.closest('.hotspot, .close-btn');
+                if (target) {
+                    if (target.classList.contains('hotspot')) {
+                        gsap.to(cursor, { width: 40, height: 40, backgroundColor: "rgba(255,180,60,0.15)", border: "1px solid rgba(255,180,60,0.6)", borderRadius: "50%", duration: 0.2 });
+                    } else {
+                        gsap.to(cursor, { width: 30, height: 30, backgroundColor: "rgba(255,180,60,0.1)", duration: 0.2 });
+                    }
                 }
-            }
-        });
+            });
 
-        document.body.addEventListener("mouseout", e => {
-            if (e.target.closest('.hotspot, .close-btn')) {
-                gsap.to(cursor, { width: 20, height: 20, backgroundColor: "transparent", border: "1px solid rgba(255,180,60,0.6)", borderRadius: "50%", duration: 0.2 });
+            document.body.addEventListener("mouseout", e => {
+                if (e.target.closest('.hotspot, .close-btn')) {
+                    gsap.to(cursor, { width: 20, height: 20, backgroundColor: "transparent", border: "1px solid rgba(255,180,60,0.6)", borderRadius: "50%", duration: 0.2 });
+                }
+            });
+        }
+
+        // Mobile Panning: Dynamic Scene Sizing & Scroll
+        const AR = 16 / 9;
+
+        function updateSceneSizes() {
+            if (!isTouch) return;
+            const vh = window.innerHeight;
+            const vw = window.innerWidth;
+
+            // Ensure the scene is ALWAYS wider than the viewport for horizontal panning.
+            // On portrait phones: vh * AR is naturally wider than vw → use vh * AR.
+            // On landscape phones: vh * AR may be narrower than vw → use vw * 1.5 to force overflow.
+            let sceneWidth = vh * AR;
+            let sceneHeight = vh;
+
+            if (sceneWidth <= vw) {
+                // Landscape: image would be too narrow, scale up to force horizontal overflow
+                sceneWidth = vw * 1.5;
+                sceneHeight = sceneWidth / AR;
             }
-        });
+
+            document.querySelectorAll('.scene-container').forEach(sc => {
+                sc.style.width = sceneWidth + 'px';
+                sc.style.height = sceneHeight + 'px';
+            });
+
+            document.querySelectorAll('.room').forEach(rm => {
+                rm.style.width = sceneWidth + 'px';
+                rm.style.height = sceneHeight + 'px';
+            });
+
+            // Update rooms-container to allow scrolling
+            roomsContainer.style.width = '100%';
+            roomsContainer.style.height = '100%';
+        }
+
+        function getSceneWidth() {
+            const vh = window.innerHeight;
+            const vw = window.innerWidth;
+            let w = vh * AR;
+            if (w <= vw) w = vw * 1.5;
+            return w;
+        }
+
+        function centerScroll() {
+            if (!isTouch) return;
+            const sceneWidth = getSceneWidth();
+            const scrollTarget = (sceneWidth - window.innerWidth) / 2;
+            roomsContainer.scrollLeft = Math.max(0, scrollTarget);
+        }
+
+        function centerScrollSmooth() {
+            if (!isTouch) return;
+            const sceneWidth = getSceneWidth();
+            const scrollTarget = (sceneWidth - window.innerWidth) / 2;
+            roomsContainer.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
+        }
+
+        if (isTouch) {
+            updateSceneSizes();
+            window.addEventListener('resize', () => {
+                updateSceneSizes();
+                centerScroll();
+            });
+
+            // Hide scroll hint after first scroll
+            let hintHidden = false;
+            roomsContainer.addEventListener('scroll', () => {
+                if (!hintHidden) {
+                    hintHidden = true;
+                    const hint = document.getElementById('scroll-hint');
+                    if (hint) {
+                        gsap.to(hint, { opacity: 0, duration: 0.5, onComplete: () => hint.style.display = 'none' });
+                    }
+                }
+            }, { passive: true });
+        }
+
+        // Desktop: wheel → horizontal scroll (only when scene overflows)
+        if (!isTouch) {
+            roomsContainer.addEventListener('wheel', (e) => {
+                // Only enable if scene is wider than viewport (shouldn't happen on desktop normally,
+                // but supports narrow desktop windows)
+                const scene = roomsContainer.querySelector('.room[style*="visible"] .scene-container');
+                if (scene && scene.offsetWidth > window.innerWidth) {
+                    e.preventDefault();
+                    roomsContainer.scrollLeft += e.deltaY;
+                }
+            }, { passive: false });
+        }
 
         // Initialize Audio
         function initAudio() {
@@ -425,7 +862,7 @@
         function toggleAudio(roomName) {
             if (!audioCtx) initAudio();
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            
+
             const node = audioNodes[roomName];
             if (isAudioEnabled) {
                 isAudioEnabled = false;
@@ -440,7 +877,11 @@
             }
         }
 
-        // Initialize Hotspots
+        // Initialize Hotspots — with touch-drag guard on mobile
+        let touchStartX = 0;
+        let touchStartY = 0;
+        const TAP_THRESHOLD = 10; // pixels; more than this = swipe, not tap
+
         Object.keys(hotspotsConfig).forEach(roomId => {
             const container = document.querySelector(`#room-${roomId} .scene-container`);
             hotspotsConfig[roomId].forEach(spot => {
@@ -458,12 +899,10 @@
                     </span>
                     <span class="hotspot-text">${spot.text || ''}</span>
                 `;
-                
-                h.addEventListener("click", (e) => {
-                    e.stopPropagation();
+
+                function executeAction() {
                     if (spot.action === "panel") {
-                        if (spot.target === "bottle-zoom") openBottleZoom(h);
-                        else openPanel(spot.target, h);
+                        openPanel(spot.target, h);
                     } else if (spot.action === "audio") {
                         toggleAudio(spot.target);
                     } else if (spot.action === "navigate") {
@@ -471,7 +910,31 @@
                     } else if (spot.action === "link") {
                         window.open(spot.target, "_blank");
                     }
-                });
+                }
+
+                if (isTouch) {
+                    // On touch: distinguish tap from swipe
+                    h.addEventListener('touchstart', (e) => {
+                        touchStartX = e.touches[0].clientX;
+                        touchStartY = e.touches[0].clientY;
+                    }, { passive: true });
+
+                    h.addEventListener('touchend', (e) => {
+                        const dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
+                        const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+                        if (dx < TAP_THRESHOLD && dy < TAP_THRESHOLD) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            executeAction();
+                        }
+                    });
+                } else {
+                    h.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        executeAction();
+                    });
+                }
+
                 container.appendChild(h);
             });
         });
@@ -484,29 +947,38 @@
             if (currentPanelTl) return;
             const panel = document.getElementById(panelId);
             if (!panel) return;
-            
+
             const rect = hotspot.getBoundingClientRect();
             const hx = rect.left + rect.width / 2;
             const hy = rect.top + rect.height / 2;
-            
+
             currentPanelTl = gsap.timeline({
                 onReverseComplete: () => {
                     gsap.set([panel, panelOverlay], { display: "none" });
                     currentPanelTl = null;
                 }
             });
-            
+
             currentPanelTl.set([panelOverlay, panel], { display: "block" });
             currentPanelTl.to(panelOverlay, { opacity: 1, duration: 0.3 });
 
             let targetLeft = "50%";
             let targetTop = "50%";
-            if (panelId === "panel-marcels-detail" && window.innerWidth > 600) {
-                const margin = 24;
-                const panelWidth = panel.offsetWidth;
-                const panelHeight = panel.offsetHeight;
-                targetLeft = (window.innerWidth - panelWidth / 2 - margin) + "px";
-                targetTop = (window.innerHeight - panelHeight / 2 - margin) + "px";
+
+            // On mobile, always center panels
+            if (!isTouch) {
+                if (window.innerWidth > 600) {
+                    const margin = 24;
+                    const panelWidth = panel.offsetWidth;
+                    const panelHeight = panel.offsetHeight;
+                    if (panelId === "panel-marcels-detail") {
+                        targetLeft = (window.innerWidth - panelWidth / 2 - margin) + "px";
+                        targetTop = (window.innerHeight - panelHeight / 2 - margin) + "px";
+                    } else if (panelId === "panel-304-bar") {
+                        targetLeft = "63%";
+                        targetTop = (window.innerHeight - panelHeight / 2 - margin) + "px";
+                    }
+                }
             }
 
             currentPanelTl.fromTo(panel, {
@@ -523,65 +995,49 @@
         panelOverlay.addEventListener("click", closePanel);
         document.querySelectorAll(".close-btn").forEach(btn => btn.addEventListener("click", closePanel));
 
-        window.addEventListener("resize", () => {
-            const panel = document.querySelector(".panel[style*='display: block']");
-            if (panel && panel.id === "panel-marcels-detail") {
-                if (window.innerWidth > 600) {
+        if (!isTouch) {
+            window.addEventListener("resize", () => {
+                const panel = document.querySelector(".panel[style*='display: block']");
+                if (panel && window.innerWidth > 600) {
                     const margin = 24;
-                    const panelWidth = panel.offsetWidth;
-                    const panelHeight = panel.offsetHeight;
-                    const targetLeft = (window.innerWidth - panelWidth / 2 - margin) + "px";
-                    const targetTop = (window.innerHeight - panelHeight / 2 - margin) + "px";
-                    gsap.set(panel, { left: targetLeft, top: targetTop });
-                } else {
+                    if (panel.id === "panel-marcels-detail") {
+                        const panelWidth = panel.offsetWidth;
+                        const panelHeight = panel.offsetHeight;
+                        const targetLeft = (window.innerWidth - panelWidth / 2 - margin) + "px";
+                        const targetTop = (window.innerHeight - panelHeight / 2 - margin) + "px";
+                        gsap.set(panel, { left: targetLeft, top: targetTop });
+                    } else if (panel.id === "panel-304-bar") {
+                        const panelHeight = panel.offsetHeight;
+                        const targetTop = (window.innerHeight - panelHeight / 2 - margin) + "px";
+                        gsap.set(panel, { left: "65%", top: targetTop });
+                    }
+                } else if (panel && (panel.id === "panel-marcels-detail" || panel.id === "panel-304-bar")) {
                     gsap.set(panel, { left: "50%", top: "50%" });
                 }
-            }
-        });
-
-        // Bottle Zoom Logic
-        let bottleTl = null;
-        function openBottleZoom(hotspot) {
-            if (bottleTl) return;
-            const overlay = document.getElementById("bottle-zoom-overlay");
-            const container = overlay.querySelector(".bottle-container");
-            const notes = overlay.querySelector(".tasting-notes");
-            
-            const rect = hotspot.getBoundingClientRect();
-            const hx = rect.left + rect.width / 2;
-            const hy = rect.top + rect.height / 2;
-            
-            bottleTl = gsap.timeline();
-            bottleTl.set(overlay, { display: "block" });
-            bottleTl.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.4 });
-            bottleTl.fromTo(container, {
-                left: hx, top: hy, xPercent: -50, yPercent: -50, scale: 0.15
-            }, {
-                left: "50%", top: "50%", scale: 1, duration: 0.6, ease: "power3.out"
-            }, "-=0.4");
-            if (notes) {
-                bottleTl.fromTo(notes, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 }, "-=0.2");
-            }
+            });
         }
 
-        document.getElementById("bottle-zoom-overlay").addEventListener("click", () => {
-            if (bottleTl) {
-                bottleTl.reverse().then(() => { gsap.set("#bottle-zoom-overlay", { display: "none" }); });
-                bottleTl = null;
-            }
-        });
+        // Bottle Zoom logic removed
 
         function switchRoom(newIndex) {
             if (newIndex === currentRoomIndex || isSwitching) return;
             isSwitching = true;
-            
+
             const oldRoom = document.getElementById(`room-${rooms[currentRoomIndex]}`);
             const newRoom = document.getElementById(`room-${rooms[newIndex]}`);
-            
-            const tl = gsap.timeline({ onComplete: () => isSwitching = false });
-            
+
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    isSwitching = false;
+                    // Re-center scroll after room switch on mobile
+                    if (isTouch) {
+                        setTimeout(centerScroll, 50);
+                    }
+                }
+            });
+
             tl.to(oldRoom, { opacity: 0, duration: 0.5, onComplete: () => gsap.set(oldRoom, { visibility: "hidden" }) });
-            
+
             if (isAudioEnabled && audioCtx) {
                 const oldNode = audioNodes[rooms[currentRoomIndex]];
                 const newNode = audioNodes[rooms[newIndex]];
@@ -595,28 +1051,121 @@
                 newNode.gainNode.gain.setValueAtTime(0, audioCtx.currentTime + 0.7);
                 newNode.gainNode.gain.linearRampToValueAtTime(newNode.maxGain, audioCtx.currentTime + 1.9);
             }
-            
+
             currentRoomIndex = newIndex;
             tl.set(newRoom, { visibility: "visible", scale: 1.08, opacity: 0 }, "+=0.2");
             tl.to(newRoom, { scale: 1, opacity: 1, duration: 1.2, ease: "power2.out" });
         }
 
         // Entry Sequence
+        let entryClicked = false;
+
+        function requestFullScreen() {
+            const docEl = document.documentElement;
+            if (docEl.requestFullscreen) {
+                docEl.requestFullscreen();
+            } else if (docEl.webkitRequestFullscreen) {
+                docEl.webkitRequestFullscreen();
+            } else if (docEl.mozRequestFullScreen) {
+                docEl.mozRequestFullScreen();
+            } else if (docEl.msRequestFullscreen) {
+                docEl.msRequestFullscreen();
+            }
+        }
+
+        function startPortfolioTransition() {
+            if (entryClicked) return;
+            entryClicked = true;
+
+            const entrySeq = document.getElementById("entry-sequence");
+            if (entrySeq) entrySeq.style.pointerEvents = "none";
+
+            if (!isTouch) {
+                gsap.to(cursor, {
+                    width: 20,
+                    height: 20,
+                    backgroundColor: "transparent",
+                    border: "1px solid rgba(255,180,60,0.6)",
+                    duration: 0.4
+                });
+            }
+
+            const tlExit = gsap.timeline();
+            tlExit.to("#entry-sequence", {
+                opacity: 0,
+                duration: 1.2,
+                ease: "power2.inOut",
+                onComplete: () => {
+                    gsap.set("#entry-sequence", { display: "none" });
+                }
+            });
+
+            tlExit.set("#room-study", { visibility: "visible", scale: 1.08, opacity: 0 });
+            tlExit.to("#room-study", {
+                scale: 1, opacity: 1, duration: 1.8, ease: "power2.out",
+                onComplete: () => {
+                    // Center scroll after first room appears on mobile
+                    if (isTouch) {
+                        centerScroll();
+                    }
+                }
+            }, "-=0.6");
+        }
+
+        document.getElementById("entry-sequence").addEventListener("click", () => {
+            try {
+                requestFullScreen();
+            } catch (err) {
+                console.log("Fullscreen request rejected", err);
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            startPortfolioTransition();
+        });
+
         window.addEventListener("load", () => {
+            if (!isTouch) {
+                gsap.to(cursor, {
+                    width: 32,
+                    height: 32,
+                    backgroundColor: "rgba(255,180,60,0.05)",
+                    border: "1px solid rgba(255,180,60,0.4)",
+                    duration: 1
+                });
+            }
+
             const tl = gsap.timeline();
-            tl.to(".wordmark", { opacity: 1, duration: 1 });
-            tl.to(".subtitle", { opacity: 0.55, duration: 1 }, "+=0.5");
-            tl.to([".wordmark", ".subtitle"], { opacity: 0, duration: 1 }, "+=1.5");
-            
-            tl.set("#room-study", { visibility: "visible", scale: 1.08, opacity: 0 });
-            tl.set("#entry-sequence", { display: "none" });
-            
-            tl.to("#room-study", { scale: 1, opacity: 1, duration: 1.8, ease: "power2.out" });
+
+            tl.to(".wordmark", { opacity: 1, duration: 1.2, ease: "power2.out" });
+
+            tl.to(".wordmark .expand-text", {
+                width: "auto",
+                opacity: 1,
+                duration: 2.2,
+                ease: "power3.inOut"
+            }, "+=0.3");
+
+            tl.to(".wordmark .space", {
+                width: "auto",
+                opacity: 1,
+                duration: 2.2,
+                ease: "power3.inOut"
+            }, "<");
+
+            tl.to(".subtitle", { opacity: 0.6, duration: 1.2, ease: "power2.out" }, "-=1.0");
+
+            setTimeout(() => {
+                if (!entryClicked) {
+                    startPortfolioTransition();
+                }
+            }, 7500);
         });
 
         document.body.addEventListener('click', () => {
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        }, {once: true});
+        }, { once: true });
     </script>
 </body>
+
 </html>
