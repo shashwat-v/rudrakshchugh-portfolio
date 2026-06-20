@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Portfolio</title>
+    <title>Rudraksh Chugh</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='36' fill='%23ffffff'/%3E%3Cg transform='translate(34.6 28.05) scale(0.8)'%3E%3Cpath fill='%23000000' d='M163.5 172.22 L162.4 179.88 C158.84 179.88 155.83 179.6 152.27 179.33 C132.28 177.96 121.59 172.77 109.54 155.82 C99.41 141.88 89.55 124.66 80.79 110.72 C78.25 106.67 76.13 104.14 73.19 102.6 C71.42 101.67 70.92 99.38 72.18 97.83 C72.77 97.09 73.34 96.35 73.89 95.59 C76.5 92.01 80.09 89.28 84.17 87.55 C86.89 86.4 89.29 84.93 91.47 83.1 C102.15 75.18 106.53 64.24 106.53 49.48 C106.53 20.23 87.09 9.57 66.0 9.57 C58.06 9.57 5.99 9.42 0.0 9.25 L0.0 0.0 L69.83 0.0 C89.83 0.0 103.25 2.46 113.65 9.29 C124.88 16.4 132.28 28.7 132.28 45.38 C132.28 68.89 117.21 83.65 96.95 92.4 C101.88 100.87 113.65 119.19 121.87 131.49 C132.0 145.98 137.2 152.82 143.5 159.65 C150.9 167.58 157.2 170.58 163.5 172.22 Z M50.68 81.32 C43.02 80.83 36.71 87.13 37.19 94.78 C37.59 101.08 42.72 106.19 49.03 106.59 C56.69 107.08 63.0 100.78 62.52 93.13 C62.12 86.83 56.99 81.72 50.68 81.32 Z'/%3E%3C/g%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -53,43 +55,68 @@
             cursor: none;
         }
 
-        .wordmark {
-            font-family: 'Cormorant Garamond', serif;
-            font-style: italic;
-            font-weight: 400;
-            font-size: clamp(48px, 7vw, 96px);
-            letter-spacing: 0.15em;
-            color: #e8d5b0;
-            opacity: 0;
+        /* Logo lockup */
+        .logo-stage {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .wordmark .expand-text {
-            display: inline-block;
-            width: 0;
+        .logo-glow {
+            position: absolute;
+            width: clamp(260px, 34vw, 440px);
+            height: clamp(260px, 34vw, 440px);
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                    rgba(255, 255, 255, 0.10) 0%,
+                    rgba(255, 255, 255, 0.035) 38%,
+                    transparent 70%);
+            filter: blur(6px);
             opacity: 0;
-            overflow: hidden;
-            white-space: nowrap;
+            pointer-events: none;
         }
 
-        .wordmark .space {
-            display: inline-block;
-            width: 0;
+        .logo-mark {
+            position: relative;
+            width: clamp(140px, 18vw, 240px);
+            height: auto;
+            display: block;
+            overflow: visible;
+        }
+
+        .logo-mark .lp {
+            fill: #ffffff;
+            fill-opacity: 0;
+            stroke: #ffffff;
+            stroke-width: 1.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 1;
+        }
+
+        .wordmark {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: clamp(26px, 3.6vw, 50px);
+            letter-spacing: 0.42em;
+            text-indent: 0.42em;
+            text-transform: uppercase;
+            color: #f4f4f4;
             opacity: 0;
-            overflow: hidden;
+            margin-top: clamp(28px, 4vw, 48px);
             white-space: nowrap;
+            text-align: center;
         }
 
         .subtitle {
             font-family: 'EB Garamond', serif;
             font-style: italic;
-            font-size: 18px;
-            color: #e8d5b0;
+            font-size: 15px;
+            color: rgba(244, 244, 244, 0.45);
             opacity: 0;
-            margin-top: 24px;
-            letter-spacing: 0.05em;
+            margin-top: 18px;
+            letter-spacing: 0.12em;
             text-align: center;
         }
 
@@ -172,6 +199,11 @@
             display: none !important;
         }
 
+        /* Hide the full-screen hint on mobile */
+        html.mobile-mode .subtitle {
+            display: none !important;
+        }
+
         html.mobile-mode #rooms-container {
             overflow: auto;
             -webkit-overflow-scrolling: touch;
@@ -201,27 +233,34 @@
             /* width set dynamically by JS */
         }
 
-        /* Hotspots: always show text, bigger tap targets */
+        /* Hotspots on touch: collapsed filled half-opacity circles; tap to reveal label */
         html.mobile-mode .hotspot {
-            max-width: 250px;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(2px);
             cursor: pointer;
+        }
+
+        /* Open state (after tap): expands to show the label */
+        html.mobile-mode .hotspot.open {
+            max-width: 250px;
+            background: rgba(0, 0, 0, 0.4);
             min-height: 36px;
             height: auto;
             border-radius: 18px;
         }
 
         html.mobile-mode .hotspot .hotspot-text {
+            opacity: 0 !important;
+        }
+
+        html.mobile-mode .hotspot.open .hotspot-text {
             opacity: 1 !important;
         }
 
-        html.mobile-mode .hotspot.expand-right .hotspot-text {
-            opacity: 1;
-        }
-
-        html.mobile-mode .hotspot.expand-left .hotspot-text {
-            opacity: 1;
+        /* Smaller arrow on touch so it doesn't cover the object behind it */
+        html.mobile-mode .hotspot .hotspot-icon svg {
+            width: 9px;
+            height: 8px;
         }
 
         /* Panels: mobile-friendly sizing */
@@ -235,6 +274,7 @@
 
         /* iPad / tablet panel height cap — needs higher specificity to override mobile-mode */
         @media (min-width: 768px) and (max-width: 1024px) {
+
             html.mobile-mode .panel,
             .panel {
                 max-height: 42vh;
@@ -537,11 +577,17 @@
     <div id="cursor"></div>
 
     <div id="entry-sequence">
-        <div class="wordmark">
-            <span class="letter">R</span><span class="expand-text">udraksh</span>
-            <span class="space">&nbsp;</span>
-            <span class="letter">C</span><span class="expand-text">hugh</span>
+        <div class="logo-stage">
+            <div class="logo-glow"></div>
+            <svg class="logo-mark" viewBox="-7 -7 177.5 193.88" xmlns="http://www.w3.org/2000/svg"
+                aria-label="Rudraksh Chugh">
+                <path id="logo-r" class="lp" pathLength="1"
+                    d="M163.5 172.22 L162.4 179.88 C158.84 179.88 155.83 179.6 152.27 179.33 C132.28 177.96 121.59 172.77 109.54 155.82 C99.41 141.88 89.55 124.66 80.79 110.72 C78.25 106.67 76.13 104.14 73.19 102.6 C71.42 101.67 70.92 99.38 72.18 97.83 C72.77 97.09 73.34 96.35 73.89 95.59 C76.5 92.01 80.09 89.28 84.17 87.55 C86.89 86.4 89.29 84.93 91.47 83.1 C102.15 75.18 106.53 64.24 106.53 49.48 C106.53 20.23 87.09 9.57 66.0 9.57 C58.06 9.57 5.99 9.42 0.0 9.25 L0.0 0.0 L69.83 0.0 C89.83 0.0 103.25 2.46 113.65 9.29 C124.88 16.4 132.28 28.7 132.28 45.38 C132.28 68.89 117.21 83.65 96.95 92.4 C101.88 100.87 113.65 119.19 121.87 131.49 C132.0 145.98 137.2 152.82 143.5 159.65 C150.9 167.58 157.2 170.58 163.5 172.22 Z" />
+                <path id="logo-dot" class="lp" pathLength="1"
+                    d="M50.68 81.32 C43.02 80.83 36.71 87.13 37.19 94.78 C37.59 101.08 42.72 106.19 49.03 106.59 C56.69 107.08 63.0 100.78 62.52 93.13 C62.12 86.83 56.99 81.72 50.68 81.32 Z" />
+            </svg>
         </div>
+        <div class="wordmark">Rudraksh Chugh</div>
         <div class="subtitle">Best experienced in full screen</div>
     </div>
 
@@ -667,7 +713,7 @@
         const hotspotsConfig = {
             study: [
                 { top: "58%", left: "50%", action: "panel", target: "panel-about-me", text: "About Me", type: "expand-right" },
-                { top: "62%", left: "62%", action: "navigate", target: 2, text: "Marcel's", type: "expand-left" },
+                { top: "54%", left: "62%", action: "navigate", target: 2, text: "Marcel's", type: "expand-left" },
                 { top: "60%", left: "14%", action: "navigate", target: 1, text: "304 Bar", type: "expand-right" },
                 { top: "28%", left: "93.5%", action: "panel", target: "panel-placeholder", text: "Coming Soon", type: "expand-left" },
                 { top: "46%", left: "25%", action: "none", text: "lowell", type: "expand-right" },
@@ -940,7 +986,16 @@
                         if (dx < TAP_THRESHOLD && dy < TAP_THRESHOLD) {
                             e.preventDefault();
                             e.stopPropagation();
-                            executeAction();
+                            // First tap: reveal the label (closing any other open one).
+                            // Second tap on an already-open hotspot: run its action.
+                            if (!h.classList.contains('open')) {
+                                document.querySelectorAll('.hotspot.open').forEach(o => {
+                                    if (o !== h) o.classList.remove('open');
+                                });
+                                h.classList.add('open');
+                            } else {
+                                executeAction();
+                            }
                         }
                     });
                 } else {
@@ -1057,7 +1112,7 @@
             const panel = document.querySelector(".panel[style*='display: block']");
             if (!panel) return;
             const isMobilePhone = window.innerWidth <= 767;
-            
+
             if (isMobilePhone || window.innerWidth <= 1024) {
                 // On mobile & tablet, clear GSAP positioning so CSS centering takes over
                 gsap.set(panel, { clearProps: "left,top,xPercent,yPercent" });
@@ -1208,29 +1263,49 @@
 
             const tl = gsap.timeline();
 
-            tl.to(".wordmark", { opacity: 1, duration: 1.2, ease: "power2.out" });
+            // Initial states for the logo reveal
+            gsap.set("#logo-r", { strokeDashoffset: 1, fillOpacity: 0, strokeWidth: 1.2 });
+            gsap.set("#logo-dot", {
+                fillOpacity: 0,
+                strokeWidth: 0,
+                scale: 0,
+                autoAlpha: 0,
+                svgOrigin: "49.85 93.96"
+            });
+            gsap.set(".logo-glow", { scale: 0.6, opacity: 0 });
 
-            tl.to(".wordmark .expand-text", {
-                width: "auto",
-                opacity: 1,
-                duration: 2.2,
-                ease: "power3.inOut"
-            }, "+=0.3");
+            // Soft glow breathes in behind the mark
+            tl.to(".logo-glow", { opacity: 1, scale: 1, duration: 2.6, ease: "sine.out" }, 0);
 
-            tl.to(".wordmark .space", {
-                width: "auto",
-                opacity: 1,
-                duration: 2.2,
-                ease: "power3.inOut"
-            }, "<");
+            // The R is drawn like ink along its outline
+            tl.to("#logo-r", { strokeDashoffset: 0, duration: 2.2, ease: "power2.inOut" }, 0.25);
 
-            tl.to(".subtitle", { opacity: 0.6, duration: 1.2, ease: "power2.out" }, "-=1.0");
+            // Ink settles into a solid fill, the drawn stroke melts away
+            tl.to("#logo-r", { fillOpacity: 1, duration: 1.0, ease: "power1.out" }, "-=0.85");
+            tl.to("#logo-r", { strokeWidth: 0, duration: 0.8, ease: "power1.out" }, "<+=0.15");
+
+            // The signature dot lands with a subtle pop
+            tl.to("#logo-dot", {
+                autoAlpha: 1,
+                scale: 1,
+                fillOpacity: 1,
+                duration: 0.7,
+                ease: "back.out(2.4)"
+            }, "-=0.75");
+
+            // Wordmark rises and tightens into place
+            tl.fromTo(".wordmark",
+                { opacity: 0, y: 18, letterSpacing: "0.62em" },
+                { opacity: 1, y: 0, letterSpacing: "0.42em", duration: 1.4, ease: "power3.out" },
+                "-=0.25");
+
+            tl.to(".subtitle", { opacity: 1, duration: 1.2, ease: "power2.out" }, "-=0.85");
 
             setTimeout(() => {
                 if (!entryClicked) {
                     startPortfolioTransition();
                 }
-            }, 7500);
+            }, 8500);
         });
 
         document.body.addEventListener('click', () => {

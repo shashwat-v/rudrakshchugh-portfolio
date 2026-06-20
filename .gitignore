@@ -1,0 +1,12 @@
+# Unused source asset (not referenced by the website — logo is an inline SVG in index.html)
+rudy logo.pdf
+
+# Local editor / tooling config
+.claude/settings.local.json
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
